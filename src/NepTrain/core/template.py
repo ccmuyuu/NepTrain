@@ -12,11 +12,17 @@ def create_vasp(force):
     sub_vasp="""#! /bin/bash
 #SBATCH --job-name=NepTrain
 #SBATCH --nodes=1
+#SBATCH --partition=cpu
 #SBATCH --ntasks-per-node=64
 #这里可以放一些加载环境的命令
 
- 
-NepTrain vasp $@ """
+#例如conda activate NepTrain
+#这里主要是为了直接传参
+NepTrain vasp $@ 
+#实际执行的脚本应该如下
+#具体参数含义可以执行NepTrain vasp -h 查看
+#NepTrain vasp demo.xyz -np 64 --directory ./cache -g --incar=./INCAR --kpoints 35 -o ./result/result.xyz 
+"""
     with open("./sub_vasp.sh", "w",encoding="utf8") as f:
         f.write(sub_vasp)
 

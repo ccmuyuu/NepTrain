@@ -17,11 +17,11 @@ NEP自动训练
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
 
-license = { text = "MIT" }
+license = { text = "GPL" }
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GPL License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -33,10 +33,12 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-
+"ase==3.23.0",
+"tqdm==4.66.5",
+"argcomplete==3.5.1"
 
 ]
-version = "1.0.0"
+version = "0.0.1"
 
 [project.urls]
 Homepage = "https://github.com/aboys-cb/NepTrain"
@@ -58,6 +60,7 @@ include = ["NepTrain", "NepTrain.*"]
 
 [tool.setuptools.package-data]
 "NepTrain" = ["config.ini" ]
+"NepTrain.io.vasp" = ["INCAR" ]
 
 
 [tool.cibuildwheel.linux]

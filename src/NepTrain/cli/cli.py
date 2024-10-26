@@ -35,7 +35,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="""
         NepTrain 是一个自动训练NEP势函数的工具""",
-        epilog="""Author: Pymatgen Development Team""",
+
     )
     subparsers = parser.add_subparsers()
 
