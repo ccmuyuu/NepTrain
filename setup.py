@@ -18,5 +18,6 @@ extra_link_args = ["-Wl,--allow-multiple-definition"] if is_win_64 else []
 
 setup(
     author="Chen Cheng bing",
+
     include_dirs=[np.get_include()],
 )
