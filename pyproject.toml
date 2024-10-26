@@ -1,6 +1,7 @@
 [build-system]
 requires = [
-    "setuptools>=65.0.0",
+
+
 ]
 build-backend = "setuptools.build_meta"
 
@@ -9,7 +10,7 @@ build-backend = "setuptools.build_meta"
 name = "NepTrain"
 authors = [{ name = "Chen Cheng bing", email = "1747193328@qq.com" }]
 
-]
+
 description = """
 NEP自动训练
 """
@@ -38,18 +39,15 @@ dependencies = [
 version = "1.0.0"
 
 [project.urls]
-Homepage = "https://pymatgen.org"
-Documentation = "https://pymatgen.org"
-Repository = "https://github.com/materialsproject/pymatgen"
-Issues = "https://github.com/materialsproject/pymatgen/issues"
-Pypi = "https://pypi.org/project/pymatgen"
+Homepage = "https://github.com/aboys-cb/NepTrain"
+Documentation = "https://github.com/aboys-cb/NepTrain"
+Repository = "https://github.com/aboys-cb/NepTrain"
+Issues = "https://github.com/aboys-cb/NepTrain/issues"
+
 
 
 [project.scripts]
-pmg = "pymatgen.cli.pmg:main"
-feff_plot_cross_section = "pymatgen.cli.feff_plot_cross_section:main"
-feff_plot_dos = "pymatgen.cli.feff_plot_dos:main"
-get_environment = "pymatgen.cli.get_environment:main"
+NepTrain = "NepTrain.cli.cli:main"
 
 [tool.setuptools]
 include-package-data = false
@@ -59,38 +57,9 @@ where = ["src"]
 include = ["NepTrain", "NepTrain.*"]
 
 [tool.setuptools.package-data]
-"pymatgen.analysis" = ["*.csv", "*.json", "*.yaml"]
-"pymatgen.analysis.chemenv" = [
-    "coordination_environments/coordination_geometries_files/*.json",
-    "coordination_environments/coordination_geometries_files/*.txt",
-    "coordination_environments/strategy_files/ImprovedConfidenceCutoffDefaultParameters.json",
-]
-"pymatgen.analysis.structure_prediction" = ["*.yaml", "data/*.json"]
-"pymatgen.analysis.diffraction" = ["*.json"]
-"pymatgen.analysis.magnetism" = ["default_magmoms.yaml"]
-"pymatgen.analysis.solar" = ["am1.5G.dat"]
-"pymatgen.entries" = ["*.json.gz", "*.yaml", "data/*.json"]
-"pymatgen.core" = ["*.json"]
-"pymatgen" = ["py.typed"]
-"pymatgen.io.vasp" = ["*.json", "*.json.bz2", "*.json.gz", "*.yaml"]
-"pymatgen.io.feff" = ["*.yaml"]
-"pymatgen.io.cp2k" = ["*.yaml"]
-"pymatgen.io.lobster" = ["lobster_basis/*.yaml"]
-"pymatgen.command_line" = ["*"]
-"pymatgen.util" = ["*.json", "structures/*.json"]
-"pymatgen.vis" = ["*.yaml"]
-"pymatgen.io.lammps" = ["CoeffsDataType.yaml", "templates/*.template"]
-"pymatgen.symmetry" = ["*.json", "*.sqlite", "*.yaml"]
+"NepTrain" = ["config.ini" ]
 
-[tool.pdm.dev-dependencies]
-lint = ["mypy>=1.10.0", "pre-commit>=3.7.1", "ruff>=0.4.9"]
-test = ["pytest-cov>=5.0.0", "pytest-split>=0.9.0", "pytest>=8.2.2"]
 
 [tool.cibuildwheel.linux]
 archs = ["auto64"]
 
-
-[tool.ruff]
-target-version = "py310"
-line-length = 120
-output-format = "concise"
