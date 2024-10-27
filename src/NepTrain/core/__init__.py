@@ -5,3 +5,4 @@
 # @email    : 1747193328@qq.com
 from .template import init_template
 from .vasp import  run_vasp
+from .perturb import run_perturb

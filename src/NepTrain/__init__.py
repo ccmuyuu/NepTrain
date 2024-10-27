@@ -9,7 +9,7 @@ import shutil
 from NepTrain import utils
 
 
-
+__version__="0.0.4"
 
 config_path = utils.get_config_path()
 

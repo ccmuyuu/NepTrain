@@ -33,12 +33,25 @@ pip install -U git+https://github.com/aboys-cb/NepTrain
 
  
 ## 使用方式
+### 暂时还没把自动训练连接起来
+
 首先先初始化下 会在当前目录下创建提交脚本
 ```sh
 NepTrain init
 ```
 修改`vim ~/.NepTrain` 修改赝势文件路径
 以下命令是一个简单的实例
+
+针对结构或者结构文件生成微扰训练集
+
+0.03的晶格形变+0.1的原子扰动
+```sh
+NepTrain perturb Cs16Ag8Bi8I48.vasp --num 200 --cell 0.03 -d 0.1 -o train.xyz
+```
+
+
+
+计算VASP单点能
 ```sh
 NepTrain vasp demo.xyz -np 64 --directory ./cache -g --incar=./INCAR --kpoints 35 -o ./result/result.xyz
 ```

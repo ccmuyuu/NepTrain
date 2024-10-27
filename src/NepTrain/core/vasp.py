@@ -53,7 +53,7 @@ def run_vasp(argparse):
 
     result = calculate_vasp(argparse.model_path,argparse)
     path=os.path.dirname(argparse.out_file_path)
-    if not os.path.exists(path):
+    if path and  not os.path.exists(path):
         os.makedirs(path)
 
     ase_write(argparse.out_file_path,result,format="extxyz",append=argparse.append)
