@@ -6,7 +6,6 @@
 import os
 import subprocess
 import sys
-sys.path.append('../../../')
 from ase import Atoms
 from ase.calculators.vasp import Vasp
 from ase.io import read

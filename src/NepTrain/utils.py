@@ -6,8 +6,9 @@
 import os
 from contextlib import contextmanager
 from pathlib import Path
+
 from typing import Generator, Union
-import logging
+
 from ase.io import read as ase_read
 from tqdm import tqdm
 def get_config_path():
@@ -54,7 +55,7 @@ def iter_path_to_atoms(glob_strs: list,show_progress=True,**kkwargs):
                     try:
                         atoms=ase_read(i.as_posix(),index=":")
                     except Exception as e:
-                        logging.error(f"文件：{i.as_posix()}读取错误!报错原因：{e}")
+                        print(f"文件：{i.as_posix()}读取错误!报错原因：{e}")
                         continue
                     if isinstance(atoms,list):
 
@@ -82,3 +83,7 @@ def iter_path_to_atoms(glob_strs: list,show_progress=True,**kkwargs):
         return wrapper
 
     return decorator
+
+
+def is_diff_path(path,path1):
+    return os.path.abspath(path)!=os.path.abspath(path1)

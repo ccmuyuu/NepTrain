@@ -6,3 +6,4 @@
 from .template import init_template
 from .vasp import  run_vasp
 from .perturb import run_perturb
+from .nep import run_nep

@@ -8,6 +8,8 @@ import logging
 import os
 
 import sys
+from email.policy import default
+
 sys.path.append('../../')
 from NepTrain.core import *
 from NepTrain import utils, __version__
@@ -138,7 +140,7 @@ def build_vasp(subparsers):
     parser_vasp.add_argument("--incar",
 
                              help="直接指定INCAR文件，全局使用这个模板")
-    k_group = parser_vasp.add_mutually_exclusive_group( )
+    k_group = parser_vasp.add_mutually_exclusive_group(required=False)
     k_group.add_argument("--kspacing", "-kspacing",
 
                          type=float,
@@ -147,6 +149,55 @@ def build_vasp(subparsers):
                          default=[1, 1, 1],
                          type=check_kpoints_number,
                          help="KPOINTS传入1个或者3个数字（用,连接），将K点设置为（k[0]/a,k[1]/b,k[2]/c）")
+
+
+def build_nep(subparsers):
+    parser_nep = subparsers.add_parser(
+        "nep",
+        help="使用NEP训练势函数",
+    )
+    parser_nep.set_defaults(func=run_nep)
+
+
+    parser_nep.add_argument("--directory", "-dir",
+
+                             type=str,
+                             help="设置NEP计算路径",
+                             default="./cache/nep"
+                             )
+    parser_nep.add_argument("--in", "-in",
+                            dest="nep_in_path",
+                             type=str,
+                             help="设置nep.in路径，默认是./nep.in,没有则根据train.xyz生成。",
+                             default="./nep.in"
+                             )
+
+    parser_nep.add_argument("--train", "-train",
+                             dest="train_path",
+
+                             type=str,
+                             help="设置train.xyz路径，默认是./train.xyz",
+                             default="./train.xyz"
+                             )
+    parser_nep.add_argument("--test", "-test",
+                             dest="test_path",
+
+                             type=str,
+                             help="设置test.xyz路径，默认是./test.xyz",
+                             default="./test.xyz"
+                             )
+    parser_nep.add_argument("--nep", "-nep",
+                            dest="nep_txt_path",
+                             type=str,
+                             help="开启预测模式需要势函数,默认是./nep.txt",
+                             default="./nep.txt"
+                             )
+    parser_nep.add_argument("--prediction", "-pred","--pred",
+
+                             action="store_true",
+                             help="设置预测模式",
+                             default=False
+                             )
 
 
 def main():
@@ -169,7 +220,7 @@ def main():
     build_perturb(subparsers)
     build_vasp(subparsers)
 
-
+    build_nep(subparsers)
 
     try:
         import argcomplete

@@ -59,6 +59,7 @@ def run_vasp(argparse):
         os.makedirs(path)
 
     ase_write(argparse.out_file_path,result,format="extxyz",append=argparse.append)
+    print("所有计算均顺利完成！")
 
 if __name__ == '__main__':
     calculate_vasp("./")
