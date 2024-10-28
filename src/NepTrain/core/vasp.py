@@ -39,11 +39,13 @@ def calculate_vasp(atoms:Atoms,argparse):
              gamma=argparse.use_gamma,
              )
     vasp.calculate(atoms,('energy'))
-
+    atoms.calc=vasp._xml_calc
     xx, yy, zz, yz, xz, xy = -vasp.results['stress'] * atoms.get_volume()  # *160.21766
     atoms.info['virial'] = np.array([(xx, xy, xz), (xy, yy, yz), (xz, yz, zz)])
     #这里没想好怎么设计config的格式化  就先使用原来的
-    # atoms.info['Config_type'] = " "
+    if "Config_type" not in atoms.info:
+
+        atoms.info['Config_type'] = "NepTrain scf "
     atoms.info['Weight'] = 1.0
     if vasp.converged:
         return atoms

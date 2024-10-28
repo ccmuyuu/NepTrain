@@ -23,6 +23,7 @@ NepTrain vasp $@
 #具体参数含义可以执行NepTrain vasp -h 查看
 #NepTrain vasp demo.xyz -np 64 --directory ./cache -g --incar=./INCAR --kpoints 35 -o ./result/result.xyz 
 """
+
     with open("./sub_vasp.sh", "w",encoding="utf8") as f:
         f.write(sub_vasp)
 
@@ -38,8 +39,6 @@ def create_nep(force):
 #SBATCH --gres=gpu:1
 #这里可以放一些加载环境的命令
  
-
-
 NepTrain $@ """
     with open("./sub_gpu.sh", "w", encoding="utf8") as f:
         f.write(sub_vasp)

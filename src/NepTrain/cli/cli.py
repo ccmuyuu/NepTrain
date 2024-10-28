@@ -138,7 +138,7 @@ def build_vasp(subparsers):
     parser_vasp.add_argument("--incar",
 
                              help="直接指定INCAR文件，全局使用这个模板")
-    k_group = parser_vasp.add_mutually_exclusive_group(required=True)
+    k_group = parser_vasp.add_mutually_exclusive_group( )
     k_group.add_argument("--kspacing", "-kspacing",
 
                          type=float,

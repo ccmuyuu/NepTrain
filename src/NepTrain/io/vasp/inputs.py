@@ -24,8 +24,6 @@ class VaspInput(Vasp):
         self.input_params["pp"] = ''
         os.environ[self.VASP_PP_PATH] = os.path.expanduser(Config.get("environ", "potcar_path"))
 
-        self.directory="./test"
-        self.command="mpirun -n 1 vasp_std"
 
         # self.converged
     def _run(self, command=None, out=None, directory=None):

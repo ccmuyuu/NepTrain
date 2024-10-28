@@ -53,7 +53,7 @@ NepTrain perturb Cs16Ag8Bi8I48.vasp --num 200 --cell 0.03 -d 0.1 -o train.xyz
 
 计算VASP单点能
 ```sh
-NepTrain vasp demo.xyz -np 64 --directory ./cache -g --incar=./INCAR --kpoints 35 -o ./result/result.xyz
+NepTrain vasp demo.xyz -np 64 --directory ./cache -g --incar=./INCAR --kpoints 20 -o ./result/result.xyz
 ```
  
  
