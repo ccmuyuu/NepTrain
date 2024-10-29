@@ -10,7 +10,7 @@ from ase import Atoms
 from ase.calculators.vasp import Vasp
 from ase.io import read
 
-from NepTrain.io.vasp import *
+from NepTrain import Config
 
 
 class VaspInput(Vasp):

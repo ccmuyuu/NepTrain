@@ -4,9 +4,9 @@
 # @Author  : 兵
 # @email    : 1747193328@qq.com
 from NepTrain import Config
-
+from .vasp import run_vasp
 from ase.calculators.vasp.setups import setups_defaults
-from .inputs import VaspInput
+from .io import VaspInput
 for option in Config.options("potcar"):
     v=Config.get("potcar", option).replace(option, "")
 

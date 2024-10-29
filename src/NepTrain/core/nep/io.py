@@ -10,15 +10,37 @@ import subprocess
 import sys
 
 
-# sys.path.append('../../../')
-
-
-
-from NepTrain.io.utils import NepFileMoniter
-
-
 from ase.data import chemical_symbols, atomic_numbers
 from NepTrain import utils, Config, observer
+from watchdog.events import FileSystemEventHandler
+
+from tqdm import tqdm
+
+class NepFileMoniter(FileSystemEventHandler):
+    def __init__(self,file_path,total):
+
+        self.file_path = file_path
+        self.pbar=tqdm(total=int(total),desc="NEP训练中")
+    def on_modified(self, event):
+
+        if not utils.is_diff_path(event.src_path , self.file_path):
+            with open(self.file_path,'r',encoding="utf8") as f:
+                lines = f.readlines()
+                if not lines:
+                    return
+                last_line=lines[-1]
+                current_steps=int(last_line.split(" ")[0])
+                self.pbar.n = current_steps
+                self.pbar.refresh()
+
+    def finish(self):
+
+        if self.pbar.n!=self.pbar.total:
+            self.pbar.n=self.pbar.total
+            self.pbar.refresh()
+
+        self.pbar.close()
+
 
 
 class RunInput:
@@ -37,10 +59,11 @@ class RunInput:
 
     def read_run(self,file_name):
         with open(file_name,'r',encoding="utf8") as f:
-            groups=re.findall("(\w+)\s+(.*?)\n",f.read()+"\n")
+            # groups=re.findall("(\w+)\s+(.*?)\n",f.read()+"\n")
+            groups=re.findall("^([A-Za-z_]+)\s+(.*)",f.read() ,re.MULTILINE)
 
             for group in groups:
-                self.run_in[group[0]]=group[1]
+                self.run_in[group[0].strip()]=group[1].strip()
 
     def build_run(self):
         """

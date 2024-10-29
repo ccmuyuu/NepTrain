@@ -4,6 +4,7 @@
 # @Author  : 兵
 # @email    : 1747193328@qq.com
 import os
+import traceback
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -77,6 +78,7 @@ def iter_path_to_atoms(glob_strs: list,show_progress=True,**kkwargs):
                 except KeyboardInterrupt:
                     return result
                 except Exception as e:
+                    print(traceback.format_exc())
                     print(e)
                     pass
             return result

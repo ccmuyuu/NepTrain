@@ -200,6 +200,45 @@ def build_nep(subparsers):
                              )
 
 
+def build_gpumd(subparsers):
+    parser_gpumd = subparsers.add_parser(
+        "gpumd",
+        help="使用GPUMD计算单点能",
+    )
+    parser_gpumd.set_defaults(func=run_gpumd)
+
+    parser_gpumd.add_argument("model_path",
+                             type=str,
+
+                             help="需要计算的结构路径或者结构文件，只支持xyz和vasp格式的文件")
+    parser_gpumd.add_argument("--directory", "-dir",
+
+                             type=str,
+                             help="设置GPUMD计算路径",
+                             default="./cache/gpumd"
+                             )
+    parser_gpumd.add_argument("--in","-in",dest="run_in_path", type=str, help="命令模板文件的文件名", default="./run.in")
+
+    parser_gpumd.add_argument("--nep", "-nep",
+                            dest="nep_txt_path",
+                             type=str,
+                             help="势函数路径,默认是./nep.txt",
+                             default="./nep.txt"
+                             )
+    parser_gpumd.add_argument("--time", "-t", type=int, help="分子动力学的时间，单位ps。", default=10)
+    parser_gpumd.add_argument("--temperature", "-T", type=int, help="分子动力学的温度", nargs="*", default=[300])
+    parser_gpumd.add_argument("--train","-train",dest="train_xyz_path", type=str, help="上一次迭代的训练集文件路径", default="./train.xyz")
+
+    parser_gpumd.add_argument("--max_selected", "-max", type=int, help="每次md最多抽取的结构", default=20)
+    parser_gpumd.add_argument("--min_distance", type=float, help="最远点采样的最小键长", default=0.01)
+    parser_gpumd.add_argument("--out", "-o",
+                             dest="out_file_path",
+                             type=str,
+                             help="计算结束后的主动学习结构输出文件",
+                             default="./gpumd_auto_learn.xyz"
+                             )
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="""
@@ -221,7 +260,7 @@ def main():
     build_vasp(subparsers)
 
     build_nep(subparsers)
-
+    build_gpumd(subparsers)
     try:
         import argcomplete
 

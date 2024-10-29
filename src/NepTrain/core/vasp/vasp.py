@@ -11,7 +11,7 @@ import numpy as np
 from ase import Atoms
 
 from ase.io import write as ase_write
-from NepTrain.io.vasp import VaspInput
+from .io import VaspInput
 from NepTrain import utils, Config,module_path
 atoms_index=1
 
@@ -19,11 +19,12 @@ atoms_index=1
                  desc="VASP计算进度",unit="job")
 def calculate_vasp(atoms:Atoms,argparse):
     global atoms_index
+
     vasp = VaspInput()
     if argparse.incar is not None:
         vasp.read_incar(argparse.incar)
     else:
-        vasp.read_incar(os.path.join(module_path,"io/vasp/INCAR"))
+        vasp.read_incar(os.path.join(module_path,"core/vasp/INCAR"))
     directory=os.path.join(argparse.directory,f"{atoms_index}-{atoms.symbols}")
     atoms_index+=1
     command=f"{Config.get('environ','mpirun_path')} -n {argparse.n_cpu} {Config.get('environ','vasp_path')}"
@@ -39,7 +40,7 @@ def calculate_vasp(atoms:Atoms,argparse):
              gamma=argparse.use_gamma,
              )
     vasp.calculate(atoms,('energy'))
-    atoms.calc=vasp._xml_calc
+    atoms.calc=vasp
     xx, yy, zz, yz, xz, xy = -vasp.results['stress'] * atoms.get_volume()  # *160.21766
     atoms.info['virial'] = np.array([(xx, xy, xz), (xy, yy, yz), (xz, yz, zz)])
     #这里没想好怎么设计config的格式化  就先使用原来的

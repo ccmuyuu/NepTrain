@@ -5,12 +5,10 @@
 # @email    : 1747193328@qq.com
 import os
 
-from NepTrain.io.nep.inputs import RunInput,PredictionRunInput
-from NepTrain.plot import plot_nep_result
+from .io import RunInput,PredictionRunInput
+from .plot import plot_nep_result
 
 def run_nep(argparse):
-
-
 
     if argparse.prediction:
 

@@ -15,7 +15,7 @@ description = """
 NEP自动训练
 """
 readme = "README.md"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.8,<3.13"
 license= { "file"="LICENSE" }
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -35,10 +35,11 @@ dependencies = [
 "ase",
 "tqdm",
 "argcomplete",
+"watchdog",
 
 
 ]
-version = "0.0.5"
+version = "0.0.5.1"
 
 [project.urls]
 Homepage = "https://github.com/aboys-cb/NepTrain"
