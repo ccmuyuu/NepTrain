@@ -12,9 +12,9 @@ from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 
 
-def plot_all_structure(train_data, add_data, save_path):
-    train_des = np.array([np.mean(get_descriptors(i, "nep.txt"), axis=0) for i in train_data])
-    add_des = np.array([np.mean(get_descriptors(i, "nep.txt"), axis=0) for i in add_data])
+def plot_all_structure(train_data, add_data,nep_path, save_path):
+    train_des = np.array([np.mean(get_descriptors(i, nep_path), axis=0) for i in train_data])
+    add_des = np.array([np.mean(get_descriptors(i, nep_path), axis=0) for i in add_data])
 
     reducer = PCA(n_components=2)
     reducer.fit(np.vstack([train_des, add_des]))

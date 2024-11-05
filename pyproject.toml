@@ -33,13 +33,17 @@ classifiers = [
 ]
 dependencies = [
 "ase",
-"tqdm",
+"rich",
 "argcomplete",
 "watchdog",
+"scikit-learn",
+"calorine",
+"ruamel.yaml"
+
 
 
 ]
-version = "0.0.5.1"
+version = "1.3.0"
 
 [project.urls]
 Homepage = "https://github.com/aboys-cb/NepTrain"
@@ -61,7 +65,9 @@ include = ["NepTrain", "NepTrain.*"]
 
 [tool.setuptools.package-data]
 "NepTrain" = ["config.ini" ]
-"NepTrain.io.vasp" = ["INCAR" ]
+"NepTrain.core.vasp" = ["INCAR" ]
+"NepTrain.core.train" = ["job.yaml" ]
+"NepTrain.core.gpumd" = ["run.in" ]
 
 
 [tool.cibuildwheel.linux]

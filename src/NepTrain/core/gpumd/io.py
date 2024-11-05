@@ -9,7 +9,8 @@ import shutil
 import subprocess
 
 from ase.io import write as ase_write
-from NepTrain import utils, observer, Config
+
+from NepTrain import utils, Config
 from .plot import *
 
 

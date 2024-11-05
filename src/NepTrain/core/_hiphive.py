@@ -8,8 +8,9 @@
 因为这个包依赖太多了 而且目前只用到了这个微扰  所以先只复制过来
 """
 import numpy as np
-from scipy.special import erf
 from ase.neighborlist import NeighborList
+from scipy.special import erf
+
 
 def _probability_mc_rattle(d, d_min, width):
     """ Monte Carlo probability function as an error function.

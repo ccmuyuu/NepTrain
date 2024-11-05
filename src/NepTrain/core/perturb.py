@@ -6,12 +6,13 @@
 import os
 
 from ase import Atoms
-from NepTrain import utils
 from ase.io import write as ase_write
 
+from NepTrain import utils
 from ._hiphive import generate_mc_rattled_structures
 
-@utils.iter_path_to_atoms(["*.vasp","*.xyz"],desc="正在生成微扰结构",unit="job")
+
+@utils.iter_path_to_atoms(["*.vasp","*.xyz"],description="正在生成微扰结构" )
 def perturb(atoms:Atoms,cell_pert_fraction=0.04,rattle_std=0.04,min_distance=0.1,num=50):
 
 

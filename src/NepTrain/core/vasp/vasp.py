@@ -9,19 +9,21 @@ import os.path
 
 import numpy as np
 from ase import Atoms
-
 from ase.io import write as ase_write
+
+from NepTrain import utils, Config, module_path
 from .io import VaspInput
-from NepTrain import utils, Config,module_path
+from ..utils import check_env
+
 atoms_index=1
 
 @utils.iter_path_to_atoms(["*.vasp","*.xyz"],show_progress=True,
-                 desc="VASP计算进度",unit="job")
+                 description="VASP计算进度" )
 def calculate_vasp(atoms:Atoms,argparse):
     global atoms_index
 
     vasp = VaspInput()
-    if argparse.incar is not None:
+    if argparse.incar is not None and os.path.exists(argparse.incar):
         vasp.read_incar(argparse.incar)
     else:
         vasp.read_incar(os.path.join(module_path,"core/vasp/INCAR"))
@@ -39,8 +41,9 @@ def calculate_vasp(atoms:Atoms,argparse):
                   math.ceil(argparse.kpoints[2]/b) ),
              gamma=argparse.use_gamma,
              )
+
     vasp.calculate(atoms,('energy'))
-    atoms.calc=vasp
+    atoms.calc=vasp._xml_calc
     xx, yy, zz, yz, xz, xy = -vasp.results['stress'] * atoms.get_volume()  # *160.21766
     atoms.info['virial'] = np.array([(xx, xy, xz), (xy, yy, yz), (xz, yz, zz)])
     #这里没想好怎么设计config的格式化  就先使用原来的
@@ -48,11 +51,14 @@ def calculate_vasp(atoms:Atoms,argparse):
 
         atoms.info['Config_type'] = "NepTrain scf "
     atoms.info['Weight'] = 1.0
+    del atoms.calc.results['stress']
+    del atoms.calc.results['free_energy']
     if vasp.converged:
         return atoms
     else:
         raise ValueError(f"{directory}: VASP not converged")
 def run_vasp(argparse):
+    check_env()
 
     result = calculate_vasp(argparse.model_path,argparse)
     path=os.path.dirname(argparse.out_file_path)
@@ -60,7 +66,8 @@ def run_vasp(argparse):
         os.makedirs(path)
 
     ase_write(argparse.out_file_path,result,format="extxyz",append=argparse.append)
-    print("所有计算均顺利完成！")
+    utils.print_success("VASP计算任务结束！" )
+
 
 if __name__ == '__main__':
     calculate_vasp("./")

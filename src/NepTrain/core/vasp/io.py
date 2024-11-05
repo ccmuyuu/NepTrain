@@ -5,8 +5,7 @@
 # @email    : 1747193328@qq.com
 import os
 import subprocess
-import sys
-from ase import Atoms
+
 from ase.calculators.vasp import Vasp
 from ase.io import read
 
@@ -35,7 +34,7 @@ class VaspInput(Vasp):
         errorcode = subprocess.call(command,
                                     shell=True,
                                     stdout=out,
-                                    stderr=subprocess.PIPE,
+                                    stderr=out,
                                     cwd=directory)
 
         return errorcode

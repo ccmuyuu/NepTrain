@@ -4,16 +4,21 @@
 # @Author  : 兵
 # @email    : 1747193328@qq.com
 import argparse
-import logging
-import os
+
 
 import sys
-from email.policy import default
-
 sys.path.append('../../')
+
+
+from NepTrain.core.gpumd import run_gpumd
+from NepTrain.core.nep import run_nep
+from NepTrain.core.train import train_nep
+from NepTrain.core.vasp import run_vasp
+
+
 from NepTrain.core import *
-from NepTrain import utils, __version__
-import warnings
+from NepTrain import __version__
+
 def check_kpoints_number(value):
     """检查值是否为单个数字或三个数字的字符串"""
 
@@ -181,7 +186,6 @@ def build_nep(subparsers):
                              )
     parser_nep.add_argument("--test", "-test",
                              dest="test_path",
-
                              type=str,
                              help="设置test.xyz路径，默认是./test.xyz",
                              default="./test.xyz"
@@ -198,8 +202,20 @@ def build_nep(subparsers):
                              help="设置预测模式",
                              default=False
                              )
+    parser_nep.add_argument("--restart_file", "-restart","--restart",
 
+                            type=str,
 
+                            help="如果需要续跑，传入一个有效的路径即可",
+                             default=None
+                             )
+    parser_nep.add_argument("--continue_step", "-cs",
+
+                            type=int,
+
+                            help="如果传入了一个restart.txt，该参数将生效，继续跑continue_step步",
+                             default=10000
+                             )
 def build_gpumd(subparsers):
     parser_gpumd = subparsers.add_parser(
         "gpumd",
@@ -214,10 +230,10 @@ def build_gpumd(subparsers):
     parser_gpumd.add_argument("--directory", "-dir",
 
                              type=str,
-                             help="设置GPUMD计算路径",
+                             help="设置GPUMD计算路径，默认./cache/gpumd",
                              default="./cache/gpumd"
                              )
-    parser_gpumd.add_argument("--in","-in",dest="run_in_path", type=str, help="命令模板文件的文件名", default="./run.in")
+    parser_gpumd.add_argument("--in","-in",dest="run_in_path", type=str, help="命令模板文件的文件名，默认为./run.in", default="./run.in")
 
     parser_gpumd.add_argument("--nep", "-nep",
                             dest="nep_txt_path",
@@ -225,18 +241,31 @@ def build_gpumd(subparsers):
                              help="势函数路径,默认是./nep.txt",
                              default="./nep.txt"
                              )
-    parser_gpumd.add_argument("--time", "-t", type=int, help="分子动力学的时间，单位ps。", default=10)
-    parser_gpumd.add_argument("--temperature", "-T", type=int, help="分子动力学的温度", nargs="*", default=[300])
-    parser_gpumd.add_argument("--train","-train",dest="train_xyz_path", type=str, help="上一次迭代的训练集文件路径", default="./train.xyz")
+    parser_gpumd.add_argument("--time", "-t", type=int, help="分子动力学的时间，默认10。单位ps。", default=10)
+    parser_gpumd.add_argument("--temperature", "-T", type=int, help="分子动力学的温度，默认300，单位k", nargs="*", default=[300])
+    parser_gpumd.add_argument("--train","-train",dest="train_xyz_path", type=str, help="上一次迭代的训练集文件路径，默认./train.xyz", default="./train.xyz")
 
-    parser_gpumd.add_argument("--max_selected", "-max", type=int, help="每次md最多抽取的结构", default=20)
-    parser_gpumd.add_argument("--min_distance", type=float, help="最远点采样的最小键长", default=0.01)
+    parser_gpumd.add_argument("--max_selected", "-max", type=int, help="每次md最多抽取的结构，默认20", default=20)
+    parser_gpumd.add_argument("--min_distance", type=float, help="最远点采样的最小键长，默认0.01", default=0.01)
     parser_gpumd.add_argument("--out", "-o",
                              dest="out_file_path",
                              type=str,
-                             help="计算结束后的主动学习结构输出文件",
+                             help="计算结束后的主动学习结构输出文件，默认./gpumd_auto_learn.xyz",
                              default="./gpumd_auto_learn.xyz"
                              )
+def build_train(subparsers):
+    parser_train = subparsers.add_parser(
+        "train",
+        help="自动训练",
+    )
+    parser_train.set_defaults(func=train_nep)
+
+    parser_train.add_argument("config_path",
+                             type=str,
+
+                             help="需要计算的结构路径或者结构文件，只支持xyz和vasp格式的文件")
+
+
 
 
 def main():
@@ -261,6 +290,10 @@ def main():
 
     build_nep(subparsers)
     build_gpumd(subparsers)
+    build_train(subparsers)
+
+
+
     try:
         import argcomplete
 

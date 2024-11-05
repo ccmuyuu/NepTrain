@@ -4,9 +4,9 @@
 # @Author  : 兵
 # @email    : 1747193328@qq.com
 import os
-from pathlib import Path
-from ase.io import read as ase_read
+
 import numpy as np
+from ase.io import read as ase_read
 from calorine.nep import get_descriptors
 from matplotlib import pyplot as plt
 from scipy.spatial.distance import cdist
@@ -56,16 +56,16 @@ def select(new_data, now_data=[], min_distance=None, min_select=1, max_select=No
 
 
 
-def select_structures(train, new , max_selected=20, min_distance=0.01):
+def select_structures(train, new ,nep_path, max_selected=20, min_distance=0.01):
     # 首先去掉跑崩溃的结构
 
     new_atoms = ase_read(new, ":", format="extxyz", do_not_split_by_at_sign=True)
 
     # new_atoms = remove_garbage_structure(new_atoms)
 
-    train_des = np.array([np.mean(get_descriptors(i, "nep.txt"), axis=0) for i in train])
+    train_des = np.array([np.mean(get_descriptors(i, nep_path), axis=0) for i in train])
 
-    new_des = np.array([np.mean(get_descriptors(i, "nep.txt"), axis=0) for i in new_atoms])
+    new_des = np.array([np.mean(get_descriptors(i, nep_path), axis=0) for i in new_atoms])
 
     selected_i = select(np.vstack([train_des, new_des]), train_des, min_distance=min_distance, max_select=max_selected,
                         min_select=0)

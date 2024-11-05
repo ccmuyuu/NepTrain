@@ -7,20 +7,23 @@ import os
 import re
 import shutil
 import subprocess
-import sys
-
 
 from ase.data import chemical_symbols, atomic_numbers
-from NepTrain import utils, Config, observer
+from rich.progress import Progress
 from watchdog.events import FileSystemEventHandler
 
-from tqdm import tqdm
+from NepTrain import utils, Config, observer
+
 
 class NepFileMoniter(FileSystemEventHandler):
     def __init__(self,file_path,total):
 
         self.file_path = file_path
-        self.pbar=tqdm(total=int(total),desc="NEP训练中")
+        self.progress = Progress( )
+        self.current_steps=0
+        self.total=total
+        self.progress.start()
+        self.pbar=self.progress.add_task(total=int(total),description="NEP训练中")
     def on_modified(self, event):
 
         if not utils.is_diff_path(event.src_path , self.file_path):
@@ -30,16 +33,17 @@ class NepFileMoniter(FileSystemEventHandler):
                     return
                 last_line=lines[-1]
                 current_steps=int(last_line.split(" ")[0])
-                self.pbar.n = current_steps
-                self.pbar.refresh()
+
+                self.progress.advance(self.pbar,current_steps-self.current_steps)
+                self.current_steps=current_steps
 
     def finish(self):
 
-        if self.pbar.n!=self.pbar.total:
-            self.pbar.n=self.pbar.total
-            self.pbar.refresh()
+        if self.progress.finished:
+            self.progress.advance(self.pbar,self.total-self.current_steps)
 
-        self.pbar.close()
+
+        self.progress.stop()
 
 
 
@@ -52,7 +56,7 @@ class RunInput:
         self.run_in={"generation":100000}
 
 
-
+        self.restart=False
         if self.nep_in_path is not None and os.path.exists(self.nep_in_path):
             self.read_run(self.nep_in_path)
         self.command=Config.get('environ','nep_path')
@@ -64,6 +68,13 @@ class RunInput:
 
             for group in groups:
                 self.run_in[group[0].strip()]=group[1].strip()
+
+    def set_restart(self,file_path,steps):
+        if file_path and os.path.exists(file_path):
+            self.restart_nep_path=file_path
+            self.run_in["generation"]=steps
+            self.run_in["lambda_1"]=0
+
 
     def build_run(self):
         """
@@ -97,6 +108,10 @@ class RunInput:
     def calculate(self,directory,show_progress=True):
         if not os.path.exists(directory):
             os.makedirs(directory )
+        if self.restart:
+            print("开始续跑模式！")
+            shutil.copy(self.restart_nep_path,os.path.join(directory,"nep.restart"))
+
 
         self.write_run(os.path.join(directory,"nep.in"))
         if self.train_xyz_path is   None or not  os.path.exists(self.train_xyz_path):

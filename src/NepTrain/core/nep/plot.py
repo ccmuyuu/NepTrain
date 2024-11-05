@@ -12,7 +12,9 @@ import glob
 import os
 
 import matplotlib
+
 from NepTrain import utils
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
