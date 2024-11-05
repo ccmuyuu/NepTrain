@@ -29,7 +29,15 @@ pip install NepTrain
 ```sh
 pip install -U git+https://github.com/aboys-cb/NepTrain
 ```
- 
+### 社区支持
+
+- [点击加入VASPTool群聊](https://qm.qq.com/q/wPDQYHMhyg)
+- 通过issue提出问题和讨论交流
+
+## 软件架构
+
+建议使用 Python 3.10 以上版本。旧版本可能会报错类型错误。
+
 
  
 ## 使用方式

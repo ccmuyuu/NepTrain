@@ -66,7 +66,6 @@ class SlurmWorker(Worker):
         utils.print_msg(f"提交任务:{job_id}",)
 
 
-
     def wait(self):
         utils.print_msg("正在等待所有任务结束")
         while  self.job_id:
