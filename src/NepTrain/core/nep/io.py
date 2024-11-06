@@ -74,6 +74,7 @@ class RunInput:
             self.restart_nep_path=file_path
             self.run_in["generation"]=steps
             self.run_in["lambda_1"]=0
+            self.restart=True
 
 
     def build_run(self):

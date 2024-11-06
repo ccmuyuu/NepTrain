@@ -37,7 +37,7 @@ pip install -U git+https://github.com/aboys-cb/NepTrain
 ## 软件架构
 
 建议使用 Python 3.10 以上版本。旧版本可能会报错类型错误。
-
+推荐使用GPUMD3.9.5以上的版本。
 
  
 ## 使用方式
