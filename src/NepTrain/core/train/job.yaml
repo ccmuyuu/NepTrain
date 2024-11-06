@@ -40,7 +40,7 @@ vasp:
     - 20 #a
     - 20 #b
     - 20 #c 二维设置1即可
-  kspacing: 0.05
+  kspacing: 0.1
 #主动学习的配置文件
 gpumd:
   #迭代渐进的时间 单位ps
