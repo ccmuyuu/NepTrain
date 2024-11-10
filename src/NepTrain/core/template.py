@@ -7,7 +7,6 @@ import os.path
 
 from ase.io import read as ase_read
 from ruamel.yaml import YAML
-
 from NepTrain import module_path, utils
 from NepTrain.core.utils import check_env
 
@@ -70,8 +69,8 @@ def init_template(argparse):
         utils.print_warning("同样需要检查修改job.yaml的gpumd主动学习的设置！")
 
         with open(os.path.join(module_path,"core/train/job.yaml"),"r",encoding="utf8") as f:
-            yaml = YAML()
-            config = yaml.load(f  )
+
+            config = YAML().load(f  )
 
         if os.path.exists("train.xyz"):
             #检查下第一个结构有没有计算
@@ -86,9 +85,21 @@ def init_template(argparse):
 
 
         with open("./job.yaml","w",encoding="utf8") as f:
-            yaml.dump(config,f  )
+            YAML().dump(config,f  )
     else:
-        pass
+
+        #已经存在 如果执行init  更新下
+        with open(os.path.join(module_path, "core/train/job.yaml"), "r", encoding="utf8") as f:
+
+            base_config = YAML().load(f)
+        with open("./job.yaml","r",encoding="utf8") as f:
+            user_config = YAML().load(f)
+        job=utils.merge_yaml(base_config,user_config)
+
+
+        with open("./job.yaml","w",encoding="utf8") as f:
+            YAML().dump(job,f  )
+
 
     if not os.path.exists("./run.in")  or argparse.force:
         utils.print_tip("创建run.in，您可修改系综设置！温度和时间程序会修改！")

@@ -34,6 +34,7 @@ class LocalWorker(Worker):
         super().__init__("local")
     def sub_job(self,command,job_path,**kwargs):
         utils.verify_path(job_path)
+
         # with  open("job.out", "w") as f_std, open("job.err", "w", buffering=1) as f_err:
         errorcode = subprocess.call(command,
                                     shell=True,

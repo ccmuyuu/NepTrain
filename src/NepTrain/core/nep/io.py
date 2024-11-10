@@ -107,10 +107,9 @@ class RunInput:
 
 
     def calculate(self,directory,show_progress=True):
-        if not os.path.exists(directory):
-            os.makedirs(directory )
+        utils.verify_path(directory)
         if self.restart:
-            print("开始续跑模式！")
+            utils.print_tip("开始续跑模式！")
             shutil.copy(self.restart_nep_path,os.path.join(directory,"nep.restart"))
 
 
@@ -158,6 +157,8 @@ class PredictionRunInput(RunInput):
         super().write_run(file_name)
 
     def calculate(self,directory,show_progress=False ):
+        utils.verify_path(directory)
+
         if self.nep_txt_path is not None and os.path.exists(self.nep_txt_path):
             if utils.is_diff_path(self.nep_txt_path, os.path.join(directory, "nep.txt")):
 

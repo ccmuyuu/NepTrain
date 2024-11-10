@@ -44,7 +44,7 @@ dependencies = [
 
 
 ]
-version = "1.3.3"
+version = "1.4.0"
 
 [project.urls]
 Homepage = "https://github.com/aboys-cb/NepTrain"

@@ -36,9 +36,9 @@ def calculate_vasp(atoms:Atoms,argparse):
     vasp.set(kspacing=argparse.kspacing,
              directory=directory,
              command=command,
-            kpts=(math.ceil(argparse.kpoints[0]/a)  ,
-                  math.ceil(argparse.kpoints[1]/b)  ,
-                  math.ceil(argparse.kpoints[2]/b) ),
+            kpts=(math.ceil(argparse.ka[0]/a)  ,
+                  math.ceil(argparse.ka[1]/b)  ,
+                  math.ceil(argparse.ka[2]/b) ),
              gamma=argparse.use_gamma,
              )
 
@@ -53,6 +53,8 @@ def calculate_vasp(atoms:Atoms,argparse):
     atoms.info['Weight'] = 1.0
     del atoms.calc.results['stress']
     del atoms.calc.results['free_energy']
+
+
     if vasp.converged:
         return atoms
     else:
@@ -65,7 +67,10 @@ def run_vasp(argparse):
     if path and  not os.path.exists(path):
         os.makedirs(path)
 
+
+
     ase_write(argparse.out_file_path,result,format="extxyz",append=argparse.append)
+
     utils.print_success("VASP计算任务结束！" )
 
 

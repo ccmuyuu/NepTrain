@@ -8,45 +8,72 @@ import os
 import shutil
 import subprocess
 import traceback
-from collections import OrderedDict
+
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Generator, Union
-
-import yaml
 from ase.io import read as ase_read
 from rich import get_console
 from rich.progress import track
+#前面几个0是为了让元素编号和索引对的上 避免了见一
+radius_table = {'H': 0.31, 'He': 0.28, 'Li': 1.28, 'Be': 0.96,
+                'B': 0.85, 'C': 0.76, 'N': 0.71, 'O': 0.66,
+                'F': 0.57, 'Ne': 0.58, 'Na': 1.66, 'Mg': 1.41,
+                'Al': 1.21, 'Si': 1.11, 'P': 1.07, 'S': 1.05,
+                'Cl': 1.02, 'Ar': 1.06, 'K': 2.03, 'Ca': 1.76,
+                'Sc': 1.7, 'Ti': 1.6, 'V': 1.53, 'Cr': 1.39,
+                'Mn': 1.39, 'Fe': 1.32, 'Co': 1.26, 'Ni': 1.24,
+                'Cu': 1.32, 'Zn': 1.22, 'Ga': 1.22, 'Ge': 1.2,
+                'As': 1.19, 'Se': 1.2, 'Br': 1.2, 'Kr': 1.16,
+                'Rb': 2.2, 'Sr': 1.95, 'Y': 1.9, 'Zr': 1.75,
+                'Nb': 1.64, 'Mo': 1.54, 'Tc': 1.47, 'Ru': 1.46,
+                'Rh': 1.42, 'Pd': 1.39, 'Ag': 1.45, 'Cd': 1.44,
+                'In': 1.42, 'Sn': 1.39, 'Sb': 1.39, 'Te': 1.38,
+                'I': 1.39, 'Xe': 1.4, 'Cs': 2.44, 'Ba': 2.15,
+                'La': 2.07, 'Ce': 2.04, 'Pr': 2.03, 'Nd': 2.01,
+                'Pm': 1.99, 'Sm': 1.98, 'Eu': 1.98, 'Gd': 1.96,
+                'Tb': 1.94, 'Dy': 1.92, 'Ho': 1.92, 'Er': 1.89,
+                'Tm': 1.9, 'Yb': 1.87, 'Lu': 1.87, 'Hf': 1.75,
+                'Ta': 1.7, 'W': 1.62, 'Re': 1.51, 'Os': 1.44,
+                'Ir': 1.41, 'Pt': 1.36, 'Au': 1.36, 'Hg': 1.32,
+                'Tl': 1.45, 'Pb': 1.46, 'Bi': 1.48, 'Po': 1.4,
+                'At': 1.5, 'Rn': 1.5, 'Fr': 2.6, 'Ra': 2.21,
+                'Ac': 2.15, 'Th': 2.06, 'Pa': 2.0, 'U': 1.96,
+                'Np': 1.9, 'Pu': 1.87, 'Am': 1.8, 'Cm': 1.69,
+                'Bk': 1.5, 'Cf': 1.5, 'Es': 1.5, 'Fm': 1.5,
+                'Md': 1.5, 'No': 1.5, 'Lr': 1.5, 'Rf': 1.5,
+                'Db': 1.5, 'Sg': 1.5, 'Bh': 1.5, 'Hs': 1.5,
+                'Mt': 1.5, 'Ds': 1.5, 'Rg': 1.5, 'Cn': 1.5,
+                'Nh': 1.5, 'Fl': 1.5, 'Mc': 1.5, 'Lv': 1.5,
+                'Ts': 1.5, 'Og': 1.5}
+
+def print(*msg, **kwargs):
+
+    get_console().print(f"[{datetime.now()}]--",*msg, **kwargs)
 
 
-def ordered_yaml_load(stream, Loader=yaml.SafeLoader,
-                      object_pairs_hook=OrderedDict):
-    class OrderedLoader(Loader):
-        pass
+def print_warning(*msg):
+    print(*msg, style="#fc5531")
 
-    def _construct_mapping(loader, node):
-        loader.flatten_mapping(node)
-        return object_pairs_hook(loader.construct_pairs(node))
+def print_msg(*msg):
+    print(*msg )
 
-    OrderedLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-        _construct_mapping)
-    return yaml.load(stream, OrderedLoader)
+def print_tip(*msg):
+    print(*msg)
+
+def print_success(*msg):
+    print(*msg, style="green")
 
 
-def ordered_yaml_dump(data, stream=None, Dumper=yaml.SafeDumper,
-                      object_pairs_hook=OrderedDict, **kwds):
-    class OrderedDumper(Dumper):
-        pass
-
-    def _dict_representer(dumper, data):
-        return dumper.represent_mapping(
-            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-            data.items())
-
-    OrderedDumper.add_representer(object_pairs_hook, _dict_representer)
-    return yaml.dump(data, stream, OrderedDumper, **kwds)
+def merge_yaml(yaml_a, yaml_b):
+    result = yaml_a.copy()  # 复制a的内容
+    for key, value in yaml_b.items():  # 遍历b的键值对
+        if key in yaml_a and isinstance(yaml_a[key], dict) and isinstance(yaml_b[key], dict):
+            result[key] = merge_yaml(yaml_a[key], yaml_b[key])  # 递归合并字典
+        else:
+            result[key] = value  # 否则直接覆盖
+    return result
 
 
 def get_config_path():
@@ -118,30 +145,29 @@ def iter_path_to_atoms(glob_strs: list,show_progress=True,**kkwargs):
         def wrapper(path: Path | str, *args, **kwargs):
             if isinstance(path, str):
                 path = Path(path)
+            paths=[]
             if path.is_dir():
                 parent = path
+                for glob_str in glob_strs:
+                    for i in parent.glob(glob_str):
+                        paths.append(i)
             else:
-                parent = path.parent
+                paths = [path]
             result =[]
 
             filter_path_list=[]
-            for glob_str in glob_strs:
-                for i in parent.glob(glob_str):
 
-                    if path.is_file():
+            for i in paths:
+                try:
+                    atoms=ase_read(i.as_posix(),index=":")
+                except Exception as e:
+                    print_warning(f"文件：{i.as_posix()}读取错误!报错原因：{e}")
+                    continue
+                if isinstance(atoms,list):
 
-                        if i.name != path.name:
-                            continue
-                    try:
-                        atoms=ase_read(i.as_posix(),index=":")
-                    except Exception as e:
-                        print(f"文件：{i.as_posix()}读取错误!报错原因：{e}")
-                        continue
-                    if isinstance(atoms,list):
-
-                        filter_path_list.extend(atoms)
-                    else:
-                        filter_path_list.append(atoms)
+                    filter_path_list.extend(atoms)
+                else:
+                    filter_path_list.append(atoms)
 
             if show_progress:
                 iter_obj=track(filter_path_list,
@@ -158,12 +184,16 @@ def iter_path_to_atoms(glob_strs: list,show_progress=True,**kkwargs):
                     return result
                 except Exception as e:
                     print(traceback.format_exc())
-                    print(e)
+                    print_warning(traceback.format_exc())
+                    print_warning(e)
                     pass
             return result
         return wrapper
 
     return decorator
+
+
+
 
 def get_command_result(cmd):
     try:
@@ -198,19 +228,4 @@ def split_list(lst, n):
     k, m = divmod(len(lst), n)
     return [lst[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n)]
 
-def print(*msg, **kwargs):
 
-    get_console().print(f"[{datetime.now()}]--",*msg, **kwargs)
-
-
-def print_warning(*msg):
-    print(*msg, style="#fc5531")
-
-def print_msg(*msg):
-    print(*msg )
-
-def print_tip(*msg):
-    print(*msg)
-
-def print_success(*msg):
-    print(*msg, style="green")

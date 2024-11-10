@@ -112,10 +112,14 @@ class NepTrainWorker:
 
 
 
+    def split_vasp_job_xyz(self,xyz_file):
+        addxyz = ase_read(xyz_file, ":", format="extxyz")
 
+        split_addxyz_list = utils.split_list(addxyz, self.config["vasp_job"])
 
-
-
+        for i, xyz in enumerate(split_addxyz_list):
+            if xyz:
+                ase_write(self.__getattr__(f"vasp_learn_add_{i + 1}_xyz_file"), xyz, format="extxyz")
 
     def check_env(self):
 
@@ -131,13 +135,8 @@ class NepTrainWorker:
 
             if self.config["vasp_job"] != 1:
 
-                addxyz = ase_read(self.config["init_train_xyz"], ":", format="extxyz")
 
-                split_addxyz_list = utils.split_list(addxyz, self.config["vasp_job"])
-
-                for i, xyz in enumerate(split_addxyz_list):
-                    ase_write(self.__getattr__(f"vasp_learn_add_{i}_xyz_file"), xyz, format="extxyz")
-
+                self.split_vasp_job_xyz(self.config["init_train_xyz"])
         elif self.config["current_job"]=="nep":
            
 
@@ -193,6 +192,7 @@ class NepTrainWorker:
             #如果上一级的势函数路径有效  就传入一下续跑的参数
 
             if os.path.exists(self.last_nep_nep_restart_file):
+                utils.print_tip("开启续跑模式！")
                 params.append("--restart_file")
                 params.append(self.last_nep_nep_restart_file)
                 params.append("--continue_step")
@@ -231,7 +231,8 @@ class NepTrainWorker:
         params.append(str(gpumd["min_distance"]))
         params.append("--out")
         params.append(self.__getattr__(f"gpumd_learn_{n_job}_xyz_file"))
-
+        if self.config.get("limit",{}).get("filter_by_bonds",True):
+            params.append("--filter")
 
 
 
@@ -245,9 +246,14 @@ class NepTrainWorker:
 
         if self.config["vasp_job"] == 1:
 
+            if not os.path.exists(self.vasp_learn_add_xyz_file):
+                return None
             params.append(self.vasp_learn_add_xyz_file)
         else:
-            params.append(self.__getattr__(f"vasp_learn_add_{n_job}_xyz_file"))
+            path=self.__getattr__(f"vasp_learn_add_{n_job}_xyz_file")
+            if not os.path.exists(path):
+                return None
+            params.append(path)
 
         params.append("--directory")
 
@@ -265,7 +271,7 @@ class NepTrainWorker:
             params.append(os.path.abspath(vasp["incar_path"]))
         if vasp["use_k_stype"]=="kpoints":
             if vasp.get("kpoints"):
-                params.append("--kpoints")
+                params.append("-ka")
                 if isinstance(vasp["kpoints"],list):
                     params.append(",".join([str(i) for i in vasp["kpoints"]]))
                 else:
@@ -288,7 +294,8 @@ class NepTrainWorker:
         if not utils.is_file_empty(self.vasp_learn_add_xyz_file):
             for i in range(self.config["vasp_job"]):
                 cmd = self.build_vasp_params(i + 1)
-
+                if cmd is None:
+                    continue
                 self.worker.sub_job(cmd, self.vasp_path, job_type="vasp")
 
             self.worker.wait()
@@ -297,6 +304,21 @@ class NepTrainWorker:
                       self.all_learn_calculated_xyz_file
 
                       )
+            if self.config.get("limit",{}).get("force") and not utils.is_file_empty(self.all_learn_calculated_xyz_file):
+                bad_structure = []
+                good_structure = []
+                structures=ase_read(self.all_learn_calculated_xyz_file,":")
+                for structure in structures:
+
+                    if structure.calc.results["forces"].max() <= self.config.get("limit",{}).get("force"):
+                        good_structure.append(structure)
+                    else:
+                        bad_structure.append(structure)
+
+                ase_write(self.all_learn_calculated_xyz_file,good_structure,append=False,format="extxyz")
+                if bad_structure:
+                    ase_write(self.remove_by_force_xyz_file, bad_structure, append=False, format="extxyz")
+
         else:
             utils.print_warning("检测到计算输入文件为空，直接进入下一步！")
 
@@ -354,12 +376,8 @@ class NepTrainWorker:
         # break
         if self.config["vasp_job"] != 1:
             # 这里分割下xyz 方便后面直接vasp计算
-            addxyz = ase_read(self.vasp_learn_add_xyz_file, ":", format="extxyz")
+            self.split_vasp_job_xyz(self.vasp_learn_add_xyz_file)
 
-            split_addxyz_list = utils.split_list(addxyz, self.config["vasp_job"])
-
-            for i, xyz in enumerate(split_addxyz_list):
-                ase_write(self.__getattr__(f"vasp_learn_add_{i}_xyz_file"), xyz, format="extxyz")
 
     def start(self,config_path):
         utils.print_msg("欢迎使用NepTrain自动训练！")

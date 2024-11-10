@@ -145,15 +145,18 @@ def build_vasp(subparsers):
     parser_vasp.add_argument("--incar",
 
                              help="直接指定INCAR文件，全局使用这个模板")
+
+
+
     k_group = parser_vasp.add_mutually_exclusive_group(required=False)
     k_group.add_argument("--kspacing", "-kspacing",
 
                          type=float,
                          help="设置kspacing，将在INCAR中设置这个参数")
-    k_group.add_argument("--kpoints", "-k",
+    k_group.add_argument("--ka", "-ka",
                          default=[1, 1, 1],
                          type=check_kpoints_number,
-                         help="KPOINTS传入1个或者3个数字（用,连接），将K点设置为（k[0]/a,k[1]/b,k[2]/c）")
+                         help="ka传入1个或者3个数字（用,连接），将K点设置为（k[0]/a,k[1]/b,k[2]/c）")
 
 
 def build_nep(subparsers):
@@ -213,7 +216,7 @@ def build_nep(subparsers):
 
                             type=int,
 
-                            help="如果传入了一个restart.txt，该参数将生效，继续跑continue_step步",
+                            help="如果传入了一个restart_file，该参数将生效，继续跑continue_step步",
                              default=10000
                              )
 def build_gpumd(subparsers):
@@ -244,6 +247,7 @@ def build_gpumd(subparsers):
     parser_gpumd.add_argument("--time", "-t", type=int, help="分子动力学的时间，默认10。单位ps。", default=10)
     parser_gpumd.add_argument("--temperature", "-T", type=int, help="分子动力学的温度，默认300，单位k", nargs="*", default=[300])
     parser_gpumd.add_argument("--train","-train",dest="train_xyz_path", type=str, help="上一次迭代的训练集文件路径，默认./train.xyz", default="./train.xyz")
+    parser_gpumd.add_argument("--filter", "-f", action="store_true", help="是否根据最小键长过滤,默认Fasle", default=False)
 
     parser_gpumd.add_argument("--max_selected", "-max", type=int, help="每次md最多抽取的结构，默认20", default=20)
     parser_gpumd.add_argument("--min_distance", type=float, help="最远点采样的最小键长，默认0.01", default=0.01)

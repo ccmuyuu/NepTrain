@@ -1,3 +1,4 @@
+version: 1.4.0
 #选择排队系统  分为slurm   local
 queue: slurm
 #在使用vasp计算单点能的时候 提交的任务数
@@ -68,5 +69,8 @@ gpumd:
   min_distance: 0.01
 
 
+limit:
+  force: 50
+  filter_by_bonds: true
 
 
