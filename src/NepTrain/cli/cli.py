@@ -4,18 +4,8 @@
 # @Author  : 兵
 # @email    : 1747193328@qq.com
 import argparse
-
-
 import sys
 sys.path.append('../../')
-
-
-from NepTrain.core.gpumd import run_gpumd
-from NepTrain.core.nep import run_nep
-from NepTrain.core.train import train_nep
-from NepTrain.core.vasp import run_vasp
-
-
 from NepTrain.core import *
 from NepTrain import __version__
 
@@ -251,6 +241,7 @@ def build_gpumd(subparsers):
 
     parser_gpumd.add_argument("--max_selected", "-max", type=int, help="每次md最多抽取的结构，默认20", default=20)
     parser_gpumd.add_argument("--min_distance", type=float, help="最远点采样的最小键长，默认0.01", default=0.01)
+
     parser_gpumd.add_argument("--out", "-o",
                              dest="out_file_path",
                              type=str,
@@ -270,7 +261,43 @@ def build_train(subparsers):
                              help="需要计算的结构路径或者结构文件，只支持xyz和vasp格式的文件")
 
 
+def build_select(subparsers):
+    parser_select = subparsers.add_parser(
+        "select",
+        help="取样命令",
+    )
+    parser_select.set_defaults(func=run_select)
 
+    parser_select.add_argument("trajectory_path",
+                             type=str,
+                             help="需要取样的轨迹文件，格式为xyz")
+
+    #还应该添加base traj
+    #势函数位置
+    parser_select.add_argument("--base", "-base",
+                               type=str,
+                               default="base",
+                               help="传入一个base.xyz路径，基于base.xyz，对trajectory进行取样"
+                               )
+    parser_select.add_argument("--nep", "-nep",
+                               type=str,
+                               default="./nep.txt",
+                               help="传入一个nep.txt路径，基于nep.txt对结构取描述符"
+                               )
+    parser_select.add_argument("--max_selected", "-max", type=int, help="最多选取的结构，默认20", default=20)
+    parser_select.add_argument("--min_distance", type=float, help="最远点采样的最小键长，默认0.01", default=0.01)
+    parser_select.add_argument("--out", "-o",
+                               dest="out_file_path",
+
+                               type=str,
+                               default="./selected.xyz",
+                               help="选中结构的输出路径"
+                               )
+    group= parser_select.add_argument_group("SOAP","SOAP的参数")
+
+    group.add_argument("--r_cut", "-r", type=float, help="A cutoff for local region in angstroms,default 6", default=6)
+    group.add_argument("--n_max", "-n", type=int, help="The number of radial basis functions,default 8", default=8)
+    group.add_argument("--l_max", "-l", type=int, help="The maximum degree of spherical harmonics,default 6", default=6)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -290,6 +317,9 @@ def main():
     build_init(subparsers)
 
     build_perturb(subparsers)
+
+    build_select(subparsers)
+
     build_vasp(subparsers)
 
     build_nep(subparsers)

@@ -79,11 +79,14 @@ def plot_train_result(axes: plt.Axes, config: dict):
 
 
 def _plot_nep_result( ):
-    out_num = len(glob.glob("*.out"))
+    out_num = len(glob.glob("*_train.out"))
+    if os.path.exists("loss.out"):
+        out_num+=1
     test_out_num = len(glob.glob("*test.out"))
 
     rows = 2 if out_num >= 4 else 1
     cols = (out_num - test_out_num) // rows + (out_num - test_out_num) % rows
+
 
     fig = plt.figure(figsize=(6 * cols, 5 * rows))
     grids = fig.add_gridspec(rows, cols)

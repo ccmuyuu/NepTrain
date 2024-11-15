@@ -13,8 +13,8 @@ from ase.io import write as ase_write
 from ruamel.yaml import YAML
 
 from NepTrain import utils
-from NepTrain.core.train.worker import LocalWorker, SlurmWorker
-from NepTrain.core.utils import check_env
+from .worker import LocalWorker, SlurmWorker
+from ..utils import check_env
 
 
 class Manager:
@@ -58,7 +58,8 @@ class NepTrainWorker:
     pass
     def __init__(self):
         self.config={}
-        self.manager=Manager(["vasp","nep","gpumd" ])
+        self.job_list=["nep","gpumd","vasp","pred", ]
+        self.manager=Manager(self.job_list)
 
     def get_worker(self):
         queue = self.config.get("queue", "local")
@@ -80,7 +81,7 @@ class NepTrainWorker:
             return generation_path
 
         items= item.split("_")
-        if items[0] in ["vasp","nep","gpumd"]:
+        if items[0] in self.job_list:
             job_path=os.path.join(generation_path, items.pop(0))
         else:
             job_path=generation_path
@@ -163,7 +164,27 @@ class NepTrainWorker:
 
             self.config=YAML().load(f )
 
+    def build_pred_params(self  ):
+        nep=self.config["nep"]
+        params=[]
+        params.append("NepTrain")
+        params.append("nep")
 
+        params.append("--directory")
+        params.append(self.pred_path)
+
+        params.append("--in")
+        params.append(os.path.abspath(nep.get("nep_in_path")))
+
+        params.append("--train")
+        params.append(self.all_learn_calculated_xyz_file)
+
+        params.append("--nep")
+        params.append(self.nep_nep_txt_file)
+
+        params.append("--prediction")
+
+        return " ".join(params)
 
 
     def build_nep_params(self  ):
@@ -181,11 +202,8 @@ class NepTrainWorker:
         params.append("--train")
         params.append(self.last_improved_train_xyz_file)
 
-
-
         params.append("--test")
         params.append(os.path.abspath(nep.get("test_xyz_path")))
-
 
         if self.config["nep"]["nep_restart"] and self.generation not in [1,len(self.config["gpumd"]["step_times"])+1]:
             #开启续跑
@@ -327,7 +345,6 @@ class NepTrainWorker:
 
 
                       )
-        self.generation += 1
 
     def sub_nep(self):
         utils.print_msg("--" * 10, f"开始训练第{self.generation}代势函数", "--" * 10)
@@ -353,6 +370,20 @@ class NepTrainWorker:
             utils.print_warning("数据集没有变化，直接复制上一次的势函数！")
 
             utils.copy_files(self.last_nep_path, self.nep_path)
+
+    def sub_nep_pred(self):
+
+        if utils.is_file_empty(self.nep_nep_txt_file):
+            utils.print_msg(f"没有势函数,跳过预测")
+            return
+        if not utils.is_file_empty(self.all_learn_calculated_xyz_file):
+            utils.print_msg(f"开始预测新增数据集")
+            cmd = self.build_pred_params()
+            self.worker.sub_job(cmd, self.pred_path, job_type="nep")
+            self.worker.wait()
+        else:
+            utils.print_msg(f"数据集没有变化,跳过预测")
+
 
     def sub_gpumd(self):
         utils.print_msg(f"开始主动学习")
@@ -400,10 +431,15 @@ class NepTrainWorker:
 
                 self.sub_vasp()
 
+            elif job=="pred":
+
+                self.sub_nep_pred()
+                self.generation += 1
+
             elif job=="nep":
 
-               self.sub_nep()
-               if self.generation>len(self.config["gpumd"]["step_times"]):
+                self.sub_nep()
+                if self.generation>len(self.config["gpumd"]["step_times"]):
                    utils.print_success("训练结束！")
                    break
 

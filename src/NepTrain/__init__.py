@@ -11,7 +11,7 @@ from watchdog.observers import Observer
 
 from NepTrain import utils
 
-__version__="1.4.0"
+__version__="1.4.2"
 
 
 

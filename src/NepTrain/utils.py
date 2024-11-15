@@ -8,14 +8,15 @@ import os
 import shutil
 import subprocess
 import traceback
-
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Generator, Union
+
 from ase.io import read as ase_read
 from rich import get_console
 from rich.progress import track
+
 #前面几个0是为了让元素编号和索引对的上 避免了见一
 radius_table = {'H': 0.31, 'He': 0.28, 'Li': 1.28, 'Be': 0.96,
                 'B': 0.85, 'C': 0.76, 'N': 0.71, 'O': 0.66,
@@ -214,6 +215,10 @@ def get_command_result(cmd):
 
 def is_file_empty(file_path):
     # 检查文件是否存在
+
+    if file_path is None:
+        return True
+
     if not os.path.exists(file_path):
         print_warning(f"文件 {file_path} 不存在。")
         return True

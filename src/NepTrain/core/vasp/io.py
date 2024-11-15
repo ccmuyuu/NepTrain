@@ -7,7 +7,7 @@ import os
 import subprocess
 
 from ase.calculators.vasp import Vasp
-from ase.io import read
+from ase.io import read as ase_read
 
 from NepTrain import Config
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
 
 
-    atoms=read("./POSCAR",format='vasp')
+    atoms=ase_read("./POSCAR",format='vasp')
     vasp.read_incar("./INCAR")
     vasp.calculate(atoms,('energy'))
     print(vasp.results)

@@ -12,8 +12,8 @@ from ase import Atoms
 from ase.io import write as ase_write
 
 from NepTrain import utils, Config, module_path
-from .io import VaspInput
 from ..utils import check_env
+from .io import VaspInput
 
 atoms_index=1
 

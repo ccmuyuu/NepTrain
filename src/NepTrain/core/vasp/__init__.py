@@ -7,7 +7,7 @@ from ase.calculators.vasp.setups import setups_defaults
 
 from NepTrain import Config
 from .io import VaspInput
-from .vasp import run_vasp
+from .run import run_vasp
 
 for option in Config.options("potcar"):
     v=Config.get("potcar", option).replace(option, "")

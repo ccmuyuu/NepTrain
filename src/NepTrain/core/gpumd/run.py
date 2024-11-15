@@ -5,17 +5,17 @@
 # @email    : 1747193328@qq.com
 
 import os.path
-import traceback
 
 from ase import Atoms
 from ase.io import read as ase_read
 from ase.io import write as ase_write
 
 from NepTrain import utils
+from ..select import select_structures, filter_by_bonds
 from .io import RunInput
-from .select import select_structures,filter_by_bonds
+from .plot import plot_md_selected
 from ..utils import check_env
-from .plot import  plot_md_selected
+
 atoms_index = 0
 
 @utils.iter_path_to_atoms(["*.vasp","*.xyz"],show_progress=False)

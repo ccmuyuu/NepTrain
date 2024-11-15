@@ -7,8 +7,9 @@ import os.path
 
 from ase.io import read as ase_read
 from ruamel.yaml import YAML
+
 from NepTrain import module_path, utils
-from NepTrain.core.utils import check_env
+from .utils import check_env
 
 
 def create_vasp(force):

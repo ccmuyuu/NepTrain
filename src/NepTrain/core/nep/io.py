@@ -8,11 +8,12 @@ import re
 import shutil
 import subprocess
 
-from ase.data import chemical_symbols, atomic_numbers
 from rich.progress import Progress
 from watchdog.events import FileSystemEventHandler
 
 from NepTrain import utils, Config, observer
+from .utils import read_symbols_from_file
+
 
 
 class NepFileMoniter(FileSystemEventHandler):
@@ -21,7 +22,7 @@ class NepFileMoniter(FileSystemEventHandler):
         self.file_path = file_path
         self.progress = Progress( )
         self.current_steps=0
-        self.total=total
+        self.total=int(total)
         self.progress.start()
         self.pbar=self.progress.add_task(total=int(total),description="NEP训练中")
     def on_modified(self, event):
@@ -83,19 +84,8 @@ class RunInput:
 
         :return:
         """
-        if os.path.exists(self.train_xyz_path):
-            with open(self.train_xyz_path,'r',encoding="utf8") as f:
-                trainxyz=f.read()
-            groups=re.findall("^([A-Z][a-z]?)\s+",trainxyz,  re.MULTILINE)
-            groups=set(groups)
-            symbols=[]
-            for symbol in groups:
-                if symbol in chemical_symbols:
-                    symbols.append(symbol)
-
-            symbols = sorted(symbols,key=lambda x:atomic_numbers[x])
-
-            self.run_in["type"]=f"{len(symbols)} {' '.join(symbols)}"
+        symbols = read_symbols_from_file(self.train_xyz_path)
+        self.run_in["type"]=f"{len(symbols)} {' '.join(symbols)}"
 
     def write_run(self,file_name):
         if  "type" not in   self.run_in :

@@ -6,11 +6,14 @@
 import os
 
 import numpy as np
-from ase.io import read as ase_read
-from calorine.nep import get_descriptors
-from matplotlib import pyplot as plt
+
 
 from scipy.spatial.distance import cdist
+
+from NepTrain.core.nep.utils import get_descriptor_function
+
+
+
 
 
 
@@ -57,21 +60,36 @@ def select(new_data, now_data=[], min_distance=None, min_select=1, max_select=No
 
 
 
-def select_structures(train, new_atoms ,nep_path, max_selected=20, min_distance=0.01 ):
+def select_structures(train, new_atoms ,descriptor, max_selected=20, min_distance=0.01 ):
     # 首先去掉跑崩溃的结构
 
 
-    train_des = np.array([np.mean(get_descriptors(i, nep_path), axis=0) for i in train])
+    descriptor_function=get_descriptor_function(descriptor)
 
 
-    new_des = np.array([np.mean(get_descriptors(i, nep_path), axis=0) for i in new_atoms])
 
-    selected_i = select(np.vstack([train_des, new_des]), train_des, min_distance=min_distance, max_select=max_selected,
+
+    train_des = np.array([np.mean(descriptor_function(i, descriptor), axis=0) for i in train])
+
+
+    new_des = np.array([np.mean(descriptor_function(i, descriptor), axis=0) for i in new_atoms])
+
+    all_des=[]
+    if train_des.size!=0:
+        all_des.append(train_des)
+    else:
+        train_des=[]
+    if new_des.size!=0:
+        all_des.append(new_des)
+
+    all_des =np.vstack(all_des)
+
+    selected_i = select(all_des, train_des, min_distance=min_distance, max_select=max_selected,
                         min_select=0)
 
 
 
-    return [new_atoms[i - train_des.shape[0]] for i in selected_i]
+    return [new_atoms[i - len(train_des)] for i in selected_i]
 
 # 加速计算每对元素的最小键长
 def compute_min_bond_lengths(atoms ):
