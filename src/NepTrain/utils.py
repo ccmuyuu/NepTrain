@@ -220,7 +220,7 @@ def is_file_empty(file_path):
         return True
 
     if not os.path.exists(file_path):
-        print_warning(f"文件 {file_path} 不存在。")
+        print_warning(f"The file {file_path} does not exist.")
         return True
         # raise FileNotFoundError(f"文件 {file_path} 不存在。")
 

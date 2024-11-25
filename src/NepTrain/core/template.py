@@ -15,20 +15,21 @@ from .utils import check_env
 def create_vasp(force):
     if   os.path.exists("./sub_vasp.sh") and not force:
         return
-    utils.print_warning("请检查sub_vasp.sh中的队列信息以及环境设置！")
+    utils.print_warning("Please check the queue information and environment settings in sub_vasp.sh!")
 
     sub_vasp="""#! /bin/bash
 #SBATCH --job-name=NepTrain
 #SBATCH --nodes=1
 #SBATCH --partition=cpu
 #SBATCH --ntasks-per-node=64
-#这里可以放一些加载环境的命令
+#You can place some environment loading commands here.
 
-#例如conda activate NepTrain
-#这里主要是为了直接传参
+
+
+#eg conda activate NepTrain
+
 $@ 
-#实际执行的脚本应该如下
-#具体参数含义可以执行NepTrain vasp -h 查看
+
 #NepTrain vasp demo.xyz -np 64 --directory ./cache -g --incar=./INCAR --kpoints 35 -o ./result/result.xyz 
 """
 
@@ -39,7 +40,7 @@ $@
 def create_nep(force):
     if os.path.exists("./sub_gpu.sh") and not force:
         return
-    utils.print_warning("请检查sub_gpu.sh中的队列信息以及环境设置！")
+    utils.print_warning("Please check the queue information and environment settings in sub_gpu.sh!")
 
     sub_vasp = """#! /bin/bash
 #SBATCH --job-name=NepTrain-gpu
@@ -47,7 +48,8 @@ def create_nep(force):
 #SBATCH --ntasks-per-node=1
 #SBATCH --partition=gpu-a800
 #SBATCH --gres=gpu:1
-#这里可以放一些加载环境的命令
+#You can place some environment loading commands here.
+
  
 $@ """
     with open("./sub_gpu.sh", "w", encoding="utf8") as f:
@@ -57,17 +59,17 @@ $@ """
 
 def init_template(argparse):
     if not argparse.force:
-        utils.print_tip("对于已有的文件我们选择跳过，如果需要强行生成覆盖，请使用-f 或者--force。")
+        utils.print_tip("For existing files, we choose to skip; if you need to forcibly generate and overwrite, please use -f or --force.")
 
     if not os.path.exists("./structure"):
         os.mkdir("./structure")
-        utils.print_tip("创建./structure，请将需要跑md的扩包结构放到该文件夹！" )
+        utils.print_tip("Create the directory ./structure, please place the expanded structures that need to run MD into this folder!" )
     check_env()
     create_vasp(argparse.force)
     create_nep(argparse.force)
     if not os.path.exists("./job.yaml") or argparse.force:
-        utils.print_tip("您需要检查修改job.yaml的vasp_job以及vasp.cpu_core。")
-        utils.print_warning("同样需要检查修改job.yaml的gpumd主动学习的设置！")
+        utils.print_tip("You need to check and modify the vasp_job and vasp.cpu_core in the job.yaml file.")
+        utils.print_warning("You also need to check and modify the settings for GPUMD active learning in job.yaml!")
 
         with open(os.path.join(module_path,"core/train/job.yaml"),"r",encoding="utf8") as f:
 
@@ -79,10 +81,10 @@ def init_template(argparse):
 
             if not (atoms.calc and "energy"   in atoms.calc.results):
                 config["current_job"]="vasp"
-                utils.print_warning("检查train.xyz的第一个结构没有计算，将初始任务设置为vasp！")
+                utils.print_warning("Check that the first structure in train.xyz has not been calculated; set the initial task to vasp!")
         else:
-            utils.print_warning("检测到当前目录下并没有train.xyz，请检查目录结构！")
-            utils.print_tip("如果有训练集但文件名不叫train.xyz，请统一job.yaml")
+            utils.print_warning("Detected that there is no train.xyz in the current directory; please check the directory structure!")
+            utils.print_tip("If there is a training set but the filename is not train.xyz, please unify the job.yaml.")
 
 
         with open("./job.yaml","w",encoding="utf8") as f:
@@ -96,15 +98,15 @@ def init_template(argparse):
         with open("./job.yaml","r",encoding="utf8") as f:
             user_config = YAML().load(f)
         job=utils.merge_yaml(base_config,user_config)
-
+        job["version"]=base_config["version"]
 
         with open("./job.yaml","w",encoding="utf8") as f:
             YAML().dump(job,f  )
 
 
     if not os.path.exists("./run.in")  or argparse.force:
-        utils.print_tip("创建run.in，您可修改系综设置！温度和时间程序会修改！")
+        utils.print_tip("Create run.in; you can modify the ensemble settings! Temperature and time will be modified by the program!")
 
         utils.copy(os.path.join(module_path,"core/gpumd/run.in"),"./run.in")
 
-    utils.print_success("初始化完成，您在检查好文件后，运行NepTrain train job.yaml即可")
+    utils.print_success("Initialization is complete. After checking the files, you can run `NepTrain train job.yaml` to proceed.")

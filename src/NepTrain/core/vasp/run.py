@@ -18,7 +18,7 @@ from .io import VaspInput
 atoms_index=1
 
 @utils.iter_path_to_atoms(["*.vasp","*.xyz"],show_progress=True,
-                 description="VASP计算进度" )
+                 description="VASP calculation progress" )
 def calculate_vasp(atoms:Atoms,argparse):
     global atoms_index
 
@@ -32,8 +32,9 @@ def calculate_vasp(atoms:Atoms,argparse):
     command=f"{Config.get('environ','mpirun_path')} -n {argparse.n_cpu} {Config.get('environ','vasp_path')}"
 
     a,b,c,alpha, beta, gamma=atoms.get_cell_lengths_and_angles()
-
-    vasp.set(kspacing=argparse.kspacing,
+    if argparse.kspacing is not None:
+        vasp.set(kspacing=argparse.kspacing)
+    vasp.set(
              directory=directory,
              command=command,
             kpts=(math.ceil(argparse.ka[0]/a)  ,
@@ -71,7 +72,7 @@ def run_vasp(argparse):
 
     ase_write(argparse.out_file_path,result,format="extxyz",append=argparse.append)
 
-    utils.print_success("VASP计算任务结束！" )
+    utils.print_success("VASP calculation task completed!" )
 
 
 if __name__ == '__main__':

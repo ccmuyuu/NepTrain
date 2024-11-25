@@ -19,23 +19,7 @@ from NepTrain.core.nep.utils import get_descriptor_function
 
 # 从pynep复制的最远点采样 就使用这一个函数 因为安装不方便
 def select(new_data, now_data=[], min_distance=None, min_select=1, max_select=None):
-    """Select those data fartheset from given data
-
-    Args:
-        new_data (2d list or array): A series of points to be selected
-        now_data (2d list or array): Points already in the dataset.
-            Defaults to []. (No existed data)
-        min_distance (float, optional):
-            If distance between two points exceeded the minimum distance, stop the selection.
-            Defaults to None (use the self.min_distance)
-        min_select (int, optional): Minimal numbers of points to be selected. This may cause
-            some distance between points less than given min_distance.
-            Defaults to 1.
-        max_select (int, optional): Maximum numbers of points to be selected.
-            Defaults to None. (No limitation)
-
-    Returns:
-        A list of int: index of selected points
+    """从pynep复制过来的
     """
     metric = 'euclidean'
     metric_para = {}

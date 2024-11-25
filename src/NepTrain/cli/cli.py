@@ -5,7 +5,7 @@
 # @email    : 1747193328@qq.com
 import argparse
 import sys
-sys.path.append('../../')
+# sys.path.append('../../')
 from NepTrain.core import *
 from NepTrain import __version__
 
@@ -20,27 +20,22 @@ def check_kpoints_number(value):
         elif len(values) == 1 and value.isdigit():
             return [int(value),int(value),int(value)]
         else:
-            raise argparse.ArgumentTypeError("参数必须是一个数字或三个用逗号分隔的数字。")
+            raise argparse.ArgumentTypeError("The ka parameter must be a single number or three numbers separated by `,`.")
     elif isinstance(value, int):
         return value
     else:
-        raise argparse.ArgumentTypeError("参数必须是一个数字或三个用逗号分隔的数字。")
+        raise argparse.ArgumentTypeError("The ka parameter must be a single number or three numbers separated by `,`.")
 
 def build_init(subparsers):
     parser_init = subparsers.add_parser(
         "init",
-        help="初始化一些文件模板",
+        help="Initialize some file templates",
     )
 
-    parser_init.add_argument("--queue", "-q",
 
-                             nargs=1,
-                             choices=["slurm", "local"],
-                             default="local",
-                             help="指定下排队方式")
     parser_init.add_argument("-f", "--force", action='store_true',
                              default=False,
-                             help="强制覆盖生成模板"
+                             help="Force overwriting of generated templates"
                              )
 
     parser_init.set_defaults(func=init_template)
@@ -49,7 +44,7 @@ def build_init(subparsers):
 def build_perturb(subparsers):
     parser_perturb = subparsers.add_parser(
         "perturb",
-        help="生成微扰结构",
+        help="Generate perturbed structures.",
     )
 
     parser_perturb.set_defaults(func=run_perturb)
@@ -57,84 +52,80 @@ def build_perturb(subparsers):
     parser_perturb.add_argument("model_path",
                              type=str,
 
-                             help="需要计算的结构路径或者结构文件，只支持xyz和vasp格式的文件")
+                             help="The structure path or structure file required for calculation only supports files in xyz and vasp formats.")
     parser_perturb.add_argument("--num","-n",
                              type=int,
                                 default=20,
-                             help="每个结构微扰的数量，如果传入一个文件夹，最终生成的数量应该是结构数*num")
+                             help="The number of perturbations for each structure, if a folder is input, the final number generated should be the number of structures multiplied by num.default 20.")
 
     parser_perturb.add_argument("--cell", "-c",
                                 dest="cell_pert_fraction",
                                 type=float,
                                 default=0.03,
-                                help="形变比例，比如0.03")
-    parser_perturb.add_argument("--rattle_std", "-l",
-                                dest="rattle_std",
-                                type=float,
-                                default=0.06,
-                                help="这个是mc的参数，具体说明可参考hiphive。比如0.06")
+                                help="The deformation ratio,default 0.03.")
+
     parser_perturb.add_argument("--distance", "-d",
                                 type=float,
                                 dest="min_distance",
                                 default=0.1,
-                                help="最小原子距离，单位埃")
+                                help="Min atom distance, unit Å, default 0.1.")
 
     parser_perturb.add_argument("--out", "-o",
                              dest="out_file_path",
                              type=str,
-                             help="微扰结构的输出文件",
+                             help="Output file for perturbed structures, default ./perturb.xyz.",
                              default="./perturb.xyz"
                              )
     parser_perturb.add_argument("--append", "-a",
                              dest="append", action='store_true', default=False,
-                             help="是否以追加形式写入out_file_path。",
+                             help="Write to out_file_path in append mode, default False.",
 
                              )
 
 def build_vasp(subparsers):
     parser_vasp = subparsers.add_parser(
         "vasp",
-        help="使用vasp计算单点能",
+        help="Calculate single-point energy using VASP.",
     )
     parser_vasp.set_defaults(func=run_vasp)
 
     parser_vasp.add_argument("model_path",
                              type=str,
 
-                             help="需要计算的结构路径或者结构文件，只支持xyz和vasp格式的文件")
+                             help="The required structure path or structure file only supports files in xyz and vasp formats.")
     parser_vasp.add_argument("--directory", "-dir",
 
                              type=str,
-                             help="设置VASP计算路径",
+                             help="Set the VASP calculation path. default ./cache/vasp.",
                              default="./cache/vasp"
                              )
 
     parser_vasp.add_argument("--out", "-o",
                              dest="out_file_path",
                              type=str,
-                             help="计算结束后的输出文件",
+                             help="Structure output file after calculation. default ./vasp_scf.xyz",
                              default="./vasp_scf.xyz"
                              )
 
     parser_vasp.add_argument("--append", "-a",
                              dest="append", action='store_true', default=False,
-                             help="是否以追加形式写入out_file_path。",
+                             help="Write to out_file_path in append mode, default False.",
 
                              )
     parser_vasp.add_argument("--gamma", "-g",
                              dest="use_gamma", action='store_true', default=False,
-                             help="默认使用Monkhorst-Pack的k点，设置-g使用Gamma的K点形式。",
+                             help="Default to using Monkhorst-Pack k-points, add -g to use Gamma-centered k-point scheme.",
 
                              )
     parser_vasp.add_argument("-n", "-np",
                              dest="n_cpu",
                              default=1,
                              type=int,
-                             help="设置CPU核数。")
+                             help="Set the number of CPU cores, default 1.")
 
     parser_vasp.add_argument("--incar",
 
-                             help="直接指定INCAR文件，全局使用这个模板")
+                             help="Input path for INCAR file, default is ./INCAR.",default="./INCAR")
 
 
 
@@ -142,17 +133,17 @@ def build_vasp(subparsers):
     k_group.add_argument("--kspacing", "-kspacing",
 
                          type=float,
-                         help="设置kspacing，将在INCAR中设置这个参数")
+                         help="Set kspacing, which can also be defined in the INCAR template.")
     k_group.add_argument("--ka", "-ka",
                          default=[1, 1, 1],
                          type=check_kpoints_number,
-                         help="ka传入1个或者3个数字（用,连接），将K点设置为（k[0]/a,k[1]/b,k[2]/c）")
+                         help="ka takes 1 or 3 numbers (comma-separated), sets k-points to (k[0]/a, k[1]/b, k[2]/c). default 1.")
 
 
 def build_nep(subparsers):
     parser_nep = subparsers.add_parser(
         "nep",
-        help="使用NEP训练势函数",
+        help="Train potential functions using NEP.",
     )
     parser_nep.set_defaults(func=run_nep)
 
@@ -160,13 +151,13 @@ def build_nep(subparsers):
     parser_nep.add_argument("--directory", "-dir",
 
                              type=str,
-                             help="设置NEP计算路径",
+                             help="Set the path for NEP calculations. default ./cache/nep",
                              default="./cache/nep"
                              )
     parser_nep.add_argument("--in", "-in",
                             dest="nep_in_path",
                              type=str,
-                             help="设置nep.in路径，默认是./nep.in,没有则根据train.xyz生成。",
+                             help="Set the path for the nep.in file; if not present, generate it based on train.xyz. default ./nep.in",
                              default="./nep.in"
                              )
 
@@ -174,126 +165,131 @@ def build_nep(subparsers):
                              dest="train_path",
 
                              type=str,
-                             help="设置train.xyz路径，默认是./train.xyz",
+                             help="Set the path for the train.xyz file, default  ./train.xyz.",
                              default="./train.xyz"
                              )
     parser_nep.add_argument("--test", "-test",
                              dest="test_path",
                              type=str,
-                             help="设置test.xyz路径，默认是./test.xyz",
+                             help="Set the path for the test.xyz file, default is ./test.xyz.",
                              default="./test.xyz"
                              )
     parser_nep.add_argument("--nep", "-nep",
                             dest="nep_txt_path",
                              type=str,
-                             help="开启预测模式需要势函数,默认是./nep.txt",
+                             help="restart and prediction require the use of a potential function, default is ./nep.txt.",
                              default="./nep.txt"
                              )
     parser_nep.add_argument("--prediction", "-pred","--pred",
 
                              action="store_true",
-                             help="设置预测模式",
+                             help="Set the forecast mode，default False",
                              default=False
                              )
     parser_nep.add_argument("--restart_file", "-restart","--restart",
 
                             type=str,
 
-                            help="如果需要续跑，传入一个有效的路径即可",
+                            help="To restart running, simply provide a valid path; default is None.",
                              default=None
                              )
     parser_nep.add_argument("--continue_step", "-cs",
 
                             type=int,
 
-                            help="如果传入了一个restart_file，该参数将生效，继续跑continue_step步",
+                            help="If a restart_file is provided, this parameter will take effect, continuing for continue_step steps, with a default value of 10000.",
                              default=10000
                              )
 def build_gpumd(subparsers):
     parser_gpumd = subparsers.add_parser(
         "gpumd",
-        help="使用GPUMD计算单点能",
+        help="run molecular dynamics using GPUMD.",
     )
     parser_gpumd.set_defaults(func=run_gpumd)
 
     parser_gpumd.add_argument("model_path",
                              type=str,
 
-                             help="需要计算的结构路径或者结构文件，只支持xyz和vasp格式的文件")
+                             help="The required structure path or structure file only supports files in xyz and vasp formats.")
     parser_gpumd.add_argument("--directory", "-dir",
 
                              type=str,
-                             help="设置GPUMD计算路径，默认./cache/gpumd",
+                             help="Set the GPUMD calculation path, default is ./cache/gpumd.",
                              default="./cache/gpumd"
                              )
-    parser_gpumd.add_argument("--in","-in",dest="run_in_path", type=str, help="命令模板文件的文件名，默认为./run.in", default="./run.in")
+    parser_gpumd.add_argument("--in","-in",dest="run_in_path", type=str,
+                              help="The filename for the command template file, default is ./run.in.", default="./run.in")
 
     parser_gpumd.add_argument("--nep", "-nep",
                             dest="nep_txt_path",
                              type=str,
-                             help="势函数路径,默认是./nep.txt",
+                             help="Potential function path, default is ./nep.txt.",
                              default="./nep.txt"
                              )
-    parser_gpumd.add_argument("--time", "-t", type=int, help="分子动力学的时间，默认10。单位ps。", default=10)
-    parser_gpumd.add_argument("--temperature", "-T", type=int, help="分子动力学的温度，默认300，单位k", nargs="*", default=[300])
-    parser_gpumd.add_argument("--train","-train",dest="train_xyz_path", type=str, help="上一次迭代的训练集文件路径，默认./train.xyz", default="./train.xyz")
-    parser_gpumd.add_argument("--filter", "-f", action="store_true", help="是否根据最小键长过滤,默认Fasle", default=False)
-
-    parser_gpumd.add_argument("--max_selected", "-max", type=int, help="每次md最多抽取的结构，默认20", default=20)
-    parser_gpumd.add_argument("--min_distance", type=float, help="最远点采样的最小键长，默认0.01", default=0.01)
-
+    parser_gpumd.add_argument("--time", "-t", type=int, help="Molecular dynamics time, unit Å, default 10 ps.", default=10)
+    parser_gpumd.add_argument("--temperature", "-T", type=int, help="Molecular dynamics temperature in Kelvin,multiple integers can be input. default is 300 K", nargs="*", default=[300])
+    parser_gpumd.add_argument("--filter", "-f", action="store_true",
+                               help="Whether to filter based on minimum bond length, default is False.",
+                               default=False)
     parser_gpumd.add_argument("--out", "-o",
-                             dest="out_file_path",
-                             type=str,
-                             help="计算结束后的主动学习结构输出文件，默认./gpumd_auto_learn.xyz",
-                             default="./gpumd_auto_learn.xyz"
-                             )
+                               dest="out_file_path",
+
+                               type=str,
+                               default="./trajectory.xyz",
+                               help="Output path for structures."
+                               )
+
 def build_train(subparsers):
     parser_train = subparsers.add_parser(
         "train",
-        help="自动训练",
+        help="Automatic training.",
     )
     parser_train.set_defaults(func=train_nep)
 
     parser_train.add_argument("config_path",
                              type=str,
 
-                             help="需要计算的结构路径或者结构文件，只支持xyz和vasp格式的文件")
+                             help="The required structure path or structure file only supports files in XYZ and VASP formats.")
 
 
 def build_select(subparsers):
     parser_select = subparsers.add_parser(
         "select",
-        help="取样命令",
+        help="Select samples.",
     )
     parser_select.set_defaults(func=run_select)
 
     parser_select.add_argument("trajectory_path",
                              type=str,
-                             help="需要取样的轨迹文件，格式为xyz")
+                             help="The trajectory file needed for sampling is in xyz format.")
 
-    #还应该添加base traj
-    #势函数位置
+
     parser_select.add_argument("--base", "-base",
                                type=str,
                                default="base",
-                               help="传入一个base.xyz路径，基于base.xyz，对trajectory进行取样"
+                               help="Provide a path to base.xyz, and sample the trajectory based on base.xyz."
                                )
     parser_select.add_argument("--nep", "-nep",
                                type=str,
                                default="./nep.txt",
-                               help="传入一个nep.txt路径，基于nep.txt对结构取描述符"
+                               help="Provide a path to a nep.txt file to extract descriptors for the structure, default is ./nep.txt. If the file does not exist, use SOAP descriptors."
                                )
-    parser_select.add_argument("--max_selected", "-max", type=int, help="最多选取的结构，默认20", default=20)
-    parser_select.add_argument("--min_distance", type=float, help="最远点采样的最小键长，默认0.01", default=0.01)
+    parser_select.add_argument("--max_selected", "-max", type=int,
+                               help="Maximum number of structures to select, default is 20.",
+                               default=20)
+    parser_select.add_argument("--min_distance","-d", type=float,
+                               help="Minimum bond length for farthest-point sampling, default is 0.01.",
+                               default=0.01)
+
     parser_select.add_argument("--out", "-o",
                                dest="out_file_path",
 
                                type=str,
                                default="./selected.xyz",
-                               help="选中结构的输出路径"
+                               help="Output path for selected structures.default ./selected.xyz"
                                )
-    group= parser_select.add_argument_group("SOAP","SOAP的参数")
+
+    group= parser_select.add_argument_group("SOAP","SOAP Parameters")
 
     group.add_argument("--r_cut", "-r", type=float, help="A cutoff for local region in angstroms,default 6", default=6)
     group.add_argument("--n_max", "-n", type=int, help="The number of radial basis functions,default 8", default=8)
@@ -302,7 +298,7 @@ def build_select(subparsers):
 def main():
     parser = argparse.ArgumentParser(
         description="""
-        NepTrain 是一个自动训练NEP势函数的工具""",
+        NepTrain is a tool for automatically training NEP potential functions""",
 
     )
     parser.add_argument(

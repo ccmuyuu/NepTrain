@@ -95,7 +95,7 @@ class RunInput:
 
                 shutil.copy(self.nep_txt_path, os.path.join(directory, "nep.txt"))
         else:
-            raise ValueError(f"{self.nep_txt_path}路径无效！")
+            raise ValueError(f"{self.nep_txt_path} is an invalid path！")
 
         with   open(os.path.join(directory,"gpumd.out"), "w") as f_std, open(os.path.join(directory,"gpumd.err"), "w", buffering=1) as f_err:
 

@@ -58,7 +58,7 @@ class NepTrainWorker:
     pass
     def __init__(self):
         self.config={}
-        self.job_list=["nep","gpumd","vasp","pred", ]
+        self.job_list=["nep","gpumd","select","vasp","pred", ]
         self.manager=Manager(self.job_list)
 
     def get_worker(self):
@@ -126,7 +126,7 @@ class NepTrainWorker:
 
 
         if self.generation!=1 or self.config.get("restart") :
-            utils.print("无需初始化检查")
+            utils.print("No need for initialization check.")
             return
 
         if self.config["current_job"]=="vasp":
@@ -152,13 +152,13 @@ class NepTrainWorker:
                 utils.copy(self.config["init_nep_txt"],
                             self.nep_nep_txt_file )
             else:
-                raise FileNotFoundError("开始任务为gpumd必须指定有效的势函数路径！")
+                raise FileNotFoundError("Starting task as gpumd requires specifying a valid potential function path!")
         else:
-            raise ValueError("current_job 只能是nep,gpumd,vasp其中一个")
+            raise ValueError("current_job can only be one of nep, gpumd, or vasp.")
 
     def read_config(self,config_path):
         if not os.path.exists(config_path):
-            raise FileNotFoundError(f"{config_path}文件不存在")
+            raise FileNotFoundError(f"The file at {config_path} does not exist.")
         with open(config_path,"r",encoding="utf8") as f:
 
 
@@ -210,7 +210,9 @@ class NepTrainWorker:
             #如果上一级的势函数路径有效  就传入一下续跑的参数
 
             if os.path.exists(self.last_nep_nep_restart_file):
-                utils.print_tip("开启续跑模式！")
+                utils.print_tip("Start the restart mode!")
+
+
                 params.append("--restart_file")
                 params.append(self.last_nep_nep_restart_file)
                 params.append("--continue_step")
@@ -241,21 +243,38 @@ class NepTrainWorker:
         params.append(" ".join([str(i) for i in gpumd["temperature_every_step"]]))
 
 
-        params.append("--train")
+        params.append("--out")
+        params.append(self.__getattr__(f"select_md_{n_job}_xyz_file"))
+
+        if gpumd.get("filter_by_bonds",True):
+            params.append("--filter")
+
+
+        return " ".join(params)
+    def build_select_params(self):
+        select=self.config["select"]
+        params=[]
+        params.append("NepTrain")
+        params.append("select")
+
+        params.append(self.select_all_md_dummp_xyz_file)
+
+        params.append("--nep")
+        params.append( self.nep_nep_txt_file)
+
+        params.append("--base")
         params.append( self.nep_train_xyz_file )
         params.append("--max_selected")
-        params.append(str(gpumd["max_selected"]))
+        params.append(str(select["max_selected"]))
         params.append("--min_distance")
-        params.append(str(gpumd["min_distance"]))
+        params.append(str(select["min_distance"]))
         params.append("--out")
-        params.append(self.__getattr__(f"gpumd_learn_{n_job}_xyz_file"))
-        if self.config.get("limit",{}).get("filter_by_bonds",True):
-            params.append("--filter")
+        params.append(self.select_selected_xyz_file)
+
 
 
 
         return " ".join(params)
-
     def build_vasp_params(self,n_job=1):
         vasp=self.config["vasp"]
         params=[]
@@ -305,11 +324,35 @@ class NepTrainWorker:
 
         return " ".join(params)
 
+    def select(self):
+        utils.cat(self.__getattr__(f"select_md_*_xyz_file"),
+                  self.select_all_md_dummp_xyz_file
+                  )
+
+        worker = LocalWorker()
+        cmd=self.build_select_params()
+        worker.sub_job(cmd, self.select_path)
+
+
+
+        utils.cat(self.select_selected_xyz_file,
+                  self.vasp_learn_add_xyz_file
+                  )
+
+
+
 
 
     def sub_vasp(self):
-        utils.print_msg("开始执行VASP计算单点能")
+        utils.print_msg("Beginning the execution of VASP for single-point energy calculations.")
+        # break
+
         if not utils.is_file_empty(self.vasp_learn_add_xyz_file):
+
+            if self.config["vasp_job"] != 1:
+                # 这里分割下xyz 方便后面直接vasp计算
+                self.split_vasp_job_xyz(self.vasp_learn_add_xyz_file)
+
             for i in range(self.config["vasp_job"]):
                 cmd = self.build_vasp_params(i + 1)
                 if cmd is None:
@@ -338,7 +381,7 @@ class NepTrainWorker:
                     ase_write(self.remove_by_force_xyz_file, bad_structure, append=False, format="extxyz")
 
         else:
-            utils.print_warning("检测到计算输入文件为空，直接进入下一步！")
+            utils.print_warning("Detected that the calculation input file is empty, proceeding directly to the next step!")
 
             utils.cat(self.vasp_learn_add_xyz_file,
                       self.all_learn_calculated_xyz_file
@@ -347,7 +390,7 @@ class NepTrainWorker:
                       )
 
     def sub_nep(self):
-        utils.print_msg("--" * 10, f"开始训练第{self.generation}代势函数", "--" * 10)
+        utils.print_msg("--" * 4, f"Starting to train the potential function for the {self.generation}th generation.", "--" * 4)
 
         if not utils.is_file_empty(self.last_all_learn_calculated_xyz_file):
 
@@ -362,61 +405,46 @@ class NepTrainWorker:
             else:
                 utils.copy(self.last_all_learn_calculated_xyz_file,
                             self.last_improved_train_xyz_file)
-            utils.print_msg(f"开始训练势函数")
+            utils.print_msg(f"Starting to train the potential function.")
             cmd = self.build_nep_params()
             self.worker.sub_job(cmd, self.nep_path, job_type="nep")
             self.worker.wait()
         else:
-            utils.print_warning("数据集没有变化，直接复制上一次的势函数！")
+            utils.print_warning("The dataset has not changed, directly copying the potential function from the last time!")
 
             utils.copy_files(self.last_nep_path, self.nep_path)
 
     def sub_nep_pred(self):
 
         if utils.is_file_empty(self.nep_nep_txt_file):
-            utils.print_msg(f"没有势函数,跳过预测")
+            utils.print_msg(f"No potential function available, skipping prediction.")
             return
         if not utils.is_file_empty(self.all_learn_calculated_xyz_file):
-            utils.print_msg(f"开始预测新增数据集")
+            utils.print_msg(f"Starting to predict new dataset.")
             cmd = self.build_pred_params()
             self.worker.sub_job(cmd, self.pred_path, job_type="nep")
             self.worker.wait()
         else:
-            utils.print_msg(f"数据集没有变化,跳过预测")
+            utils.print_msg(f"The dataset has not changed, skipping prediction.")
 
 
     def sub_gpumd(self):
-        utils.print_msg(f"开始主动学习")
+        utils.print_msg(f"Starting active learning.")
 
         cmd = self.build_gpumd_params()
 
         self.worker.sub_job(cmd, self.gpumd_path, job_type="gpumd")
         self.worker.wait()
 
-        utils.cat(self.__getattr__(f"gpumd_learn_*_xyz_file"),
-                  self.vasp_learn_add_xyz_file
-                  )
 
-        if utils.is_file_empty(self.vasp_learn_add_xyz_file):
-            # 文件为空
-
-            utils.print_warning("本轮主动学习添加结构为0！")
-
-            return
-
-        # break
-        if self.config["vasp_job"] != 1:
-            # 这里分割下xyz 方便后面直接vasp计算
-            self.split_vasp_job_xyz(self.vasp_learn_add_xyz_file)
 
 
     def start(self,config_path):
-        utils.print_msg("欢迎使用NepTrain自动训练！")
+        utils.print_msg("Welcome to NepTrain automatic training!")
 
         self.read_config(config_path)
         self.check_env()
-        #首先创建一个总的路径
-        #然后先
+
         self.worker=self.get_worker()
 
         self.manager.set_next(self.config.get("current_job"))
@@ -440,8 +468,10 @@ class NepTrainWorker:
 
                 self.sub_nep()
                 if self.generation>len(self.config["gpumd"]["step_times"]):
-                   utils.print_success("训练结束！")
+                   utils.print_success("Training completed!")
                    break
+            elif job=="select":
+                self.select()
 
             else:
                 self.sub_gpumd()
@@ -461,7 +491,7 @@ def train_nep(argparse):
     check_env()
 
     worker = NepTrainWorker()
-    # worker.start("..//core/train/job.json")
+
     worker.start(argparse.config_path)
 if __name__ == '__main__':
     train =NepTrainWorker()

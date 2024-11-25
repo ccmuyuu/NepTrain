@@ -21,4 +21,4 @@ def run_nep(argparse):
     run.set_restart(argparse.restart_file,argparse.continue_step)
     run.calculate(argparse.directory)
     plot_nep_result(argparse.directory)
-    utils.print_success("NEP训练任务结束！" )
+    utils.print_success("NEP training task completed!" )

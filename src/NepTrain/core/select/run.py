@@ -3,13 +3,13 @@
 # @Time    : 2024/11/13 19:36
 # @Author  : 兵
 # @email    : 1747193328@qq.com
-
+import os.path
 
 from NepTrain import utils
 
 from ase.io import read as ase_read
 from ase.io import write as ase_write
-from .select import select_structures
+from .select import select_structures, filter_by_bonds
 from ..gpumd.plot import plot_md_selected
 from ..nep.utils import read_symbols_from_file
 from dscribe.descriptors import SOAP
@@ -17,12 +17,20 @@ from dscribe.descriptors import SOAP
 def run_select(argparse):
 
     if utils.is_file_empty(argparse.trajectory_path):
-        raise FileNotFoundError(f"传入了一个无效的文件路径：{argparse.trajectory_path}")
-    utils.print_msg("正在读取文件，请稍等。。。")
+        raise FileNotFoundError(f"An invalid file path was provided: {argparse.trajectory_path}.")
+    utils.print_msg("Reading the file, please wait...")
 
     trajectory=ase_read(argparse.trajectory_path,":",format="extxyz")
 
-
+    # if argparse.filter:
+    # #转移到gpumd的模块
+    #     atoms=ase_read(argparse.base_structure,)
+    #     good, bad = filter_by_bonds(trajectory, model=atoms)
+    #     directory=os.path.dirname(argparse.trajectory_path)
+    #     trajectory=good
+    #     ase_write(os.path.join(directory, "good_structures.xyz"), good,append=False)
+    #     ase_write(os.path.join(directory, "remove_by_bond_structures.xyz"), bad,append=False)
+    #     utils.print_msg(f"Bond length filtering activated, {len(bad)} structures filtered out, saved to {os.path.join(directory, 'remove_by_bond_structures.xyz')}.")
 
 
     if utils.is_file_empty(argparse.base):
@@ -30,7 +38,7 @@ def run_select(argparse):
     else:
         base_train=ase_read(argparse.base,":",format="extxyz")
     if utils.is_file_empty(argparse.nep):
-        utils.print_msg("传入无效的nep.txt路径，使用SOAP描述符")
+        utils.print_msg("An invalid path for nep.txt was provided, using SOAP descriptors instead.")
         species=set()
         for atoms in trajectory+base_train:
             for i in atoms.get_chemical_symbols():
@@ -50,25 +58,27 @@ def run_select(argparse):
 
     else:
         descriptor=argparse.nep
-    utils.print_msg("开始选点，请稍等。。。")
+    utils.print_msg("Starting to select points, please wait...")
 
-    selected_structures = select_structures(base_train,trajectory,descriptor,
+    selected_structures = select_structures(base_train,
+                                            trajectory,
+                                            descriptor,
                       max_selected=argparse.max_selected,
                       min_distance=argparse.min_distance,
                       )
 
-    utils.print_msg(f"得到{len(selected_structures)}个结构" )
+    utils.print_msg(f"Obtained {len(selected_structures)} structures." )
 
     ase_write(argparse.out_file_path, selected_structures)
-
+    png_path=os.path.join(os.path.dirname(argparse.out_file_path),"selected.png")
     plot_md_selected(argparse.base,
                      argparse.trajectory_path,
 
                      argparse.out_file_path,
                      descriptor,
-                       "./selected.png" ,
+                       png_path ,
 
                      )
-    utils.print_msg("选点分布图保存到./selected.png" )
-    utils.print_msg(f"选取的结构保存到{argparse.out_file_path}" )
+    utils.print_msg(f"The point selection distribution chart is saved to {png_path}." )
+    utils.print_msg(f"The selected structures are saved to {argparse.out_file_path}." )
 

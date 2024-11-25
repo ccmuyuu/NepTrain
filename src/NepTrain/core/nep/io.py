@@ -24,7 +24,7 @@ class NepFileMoniter(FileSystemEventHandler):
         self.current_steps=0
         self.total=int(total)
         self.progress.start()
-        self.pbar=self.progress.add_task(total=int(total),description="NEP训练中")
+        self.pbar=self.progress.add_task(total=int(total),description="NEP training")
     def on_modified(self, event):
 
         if not utils.is_diff_path(event.src_path , self.file_path):
@@ -99,13 +99,13 @@ class RunInput:
     def calculate(self,directory,show_progress=True):
         utils.verify_path(directory)
         if self.restart:
-            utils.print_tip("开始续跑模式！")
+            utils.print_tip("Start the restart mode!")
             shutil.copy(self.restart_nep_path,os.path.join(directory,"nep.restart"))
 
 
         self.write_run(os.path.join(directory,"nep.in"))
         if self.train_xyz_path is   None or not  os.path.exists(self.train_xyz_path):
-            raise ValueError("必须指定一个有效的train.xyz")
+            raise ValueError("A valid train.xyz must be specified.")
         if utils.is_diff_path(self.train_xyz_path ,os.path.join(directory,"train.xyz")):
 
             shutil.copy(self.train_xyz_path,os.path.join(directory,"train.xyz"))
@@ -154,7 +154,7 @@ class PredictionRunInput(RunInput):
 
                 shutil.copy(self.nep_txt_path, os.path.join(directory, "nep.txt"))
         else:
-            raise ValueError("预测模式必须指定一个势函数，请通过--nep nep_path指定。")
+            raise ValueError("In prediction mode, a potential function must be specified, please specify it via the `--nep nep_path` option.")
         super().calculate(directory,show_progress)
 if __name__ == '__main__':
     run=RunInput("./train1.xyz")

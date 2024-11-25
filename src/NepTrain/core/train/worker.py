@@ -59,23 +59,23 @@ class SlurmWorker(Worker):
             job_command=["sbatch",self.vasp_sh,command]
         else:
             job_command=["sbatch",self.gpumd_sh,command]
-        # print(command)
+        print(command)
 
         result = subprocess.run(job_command, capture_output=True, text=True, check=True,cwd=job_path)
         job_id=int(result.stdout.replace("Submitted batch job ",""))
         self.job_id.append(job_id)
-        utils.print_msg(f"提交任务:{job_id}",)
+        utils.print_msg(f"Task submitted: {job_id}",)
 
 
     def wait(self):
-        utils.print_msg("正在等待所有任务结束")
+        utils.print_msg("Waiting for all tasks to finish...")
         while  self.job_id:
             for job in self.job_id.copy():
 
                 if not self.check_job_state(job):
                     self.job_id.remove(job)
             time.sleep(5)
-        utils.print_success("所有任务均计算结束")
+        utils.print_success("All tasks have finished computation.")
 
     def check_job_state(self,job_id):
 

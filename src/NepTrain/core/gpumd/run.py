@@ -22,10 +22,9 @@ atoms_index = 0
 def calculate_gpumd(atoms:Atoms,argparse):
     global atoms_index
     atoms_index+=1
-    trainxyz=ase_read(argparse.train_xyz_path,":",do_not_split_by_at_sign=True)
+
     new_atoms=[]
-    max_selected=argparse.max_selected
-    min_distance=argparse.min_distance
+
 
     for temperature in argparse.temperature:
 
@@ -33,17 +32,22 @@ def calculate_gpumd(atoms:Atoms,argparse):
         run.read_run(argparse.run_in_path)
         run.set_time_temp(argparse.time,temperature)
         directory=os.path.join(argparse.directory,f"{atoms_index}-{atoms.symbols}@{temperature}k-{argparse.time}ps")
-        utils.print_msg(f"GPUMD采样中，温度：{temperature}k。时间：{argparse.time*run.time_step}ps " )
+        utils.print_msg(f"GPUMD is running, temperature: {temperature}k. Time: {argparse.time*run.time_step}ps" )
 
         run.calculate(atoms,directory)
 
         dump = ase_read(os.path.join(directory,"dump.xyz"), ":", format="extxyz", do_not_split_by_at_sign=True)
+        for i, atom in enumerate(dump):
+            atom.info["Config_type"] = f"{atom.symbols}-epoch-{argparse.time}ps-{temperature}k-{i + 1}"
+
+
         if argparse.filter:
             good,bad=filter_by_bonds(dump,model=atoms)
             dump=good
-            ase_write(os.path.join(directory,"good_structures.xyz"),good)
             ase_write(os.path.join(directory,"remove_by_bond_structures.xyz"),bad)
+        ase_write(argparse.out_file_path,dump,append=True)
 
+        continue
 
 
         selected = select_structures(trainxyz + new_atoms,
@@ -76,16 +80,12 @@ def calculate_gpumd(atoms:Atoms,argparse):
     return new_atoms
 def run_gpumd(argparse):
     check_env()
-
+    utils.verify_path(os.path.dirname(argparse.out_file_path))
     result = calculate_gpumd(argparse.model_path,argparse)
-    path=os.path.dirname(argparse.out_file_path)
-    if path and  not os.path.exists(path):
-        os.makedirs(path)
-    count=0
-    for learn_result in result:
-        ase_write(argparse.out_file_path, learn_result, format="extxyz", append=True)
-        count+=len(learn_result)
-    utils.print_success(f"本次主动学习共添加{count}个结构，以追加模式写入到：{argparse.out_file_path}！" )
+
+
+
+
 
 
 

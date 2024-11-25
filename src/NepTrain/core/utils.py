@@ -11,9 +11,9 @@ from NepTrain import utils
 
 def check_env():
     if not os.path.exists(os.path.expanduser(Config.get("environ", "potcar_path"))):
-        raise FileNotFoundError("请编辑~/.NepTrain设置有效的赝势文件路径！")
+        raise FileNotFoundError("Please edit the pseudopotential file path in ~/.NepTrain to set a valid path!")
 
     for option in ["vasp_path", "mpirun_path", "nep_path", "gpumd_path"]:
         if utils.get_command_result(["which", Config.get("environ", option)]) is None:
-            utils.print_warning(f"环境变量中没有{option.replace('_path', '')},如果在提交脚本里设置环境，请忽略这条警告")
+            utils.print_warning(f"The environment variable {option.replace('_path', '')} is not set. If you have set the environment in the submission script, please ignore this warning.")
 
