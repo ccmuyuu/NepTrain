@@ -259,7 +259,7 @@ def build_select(subparsers):
         "select",
         help="Select samples.",
     )
-    parser_select.set_defaults(func=run_select)
+    parser_select.set_defaults(func=run_select,decomposition='pca')
 
     parser_select.add_argument("trajectory_path",
                              type=str,
@@ -282,6 +282,13 @@ def build_select(subparsers):
     parser_select.add_argument("--min_distance","-d", type=float,
                                help="Minimum bond length for farthest-point sampling, default is 0.01.",
                                default=0.01)
+
+
+    dc_group = parser_select.add_mutually_exclusive_group(required=False)
+    dc_group.add_argument('-pca',"--pca", action='store_const', const='pca', dest='decomposition',
+                       help='Use PCA for decomposition')
+    dc_group.add_argument('-umap',"--umap", action='store_const', const='umap', dest='decomposition',
+                       help='Use UMAP for decomposition')
 
     parser_select.add_argument("--out", "-o",
                                dest="out_file_path",

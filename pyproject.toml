@@ -40,12 +40,12 @@ dependencies = [
 "scikit-learn",
 "calorine>=3.0",
 "ruamel.yaml",
-    "dscribe"
-
+    "dscribe",
+"umap-learn>=0.5.7"
 
 
 ]
-version = "1.4.3"
+version = "1.4.4"
 
 [project.urls]
 Homepage = "https://github.com/aboys-cb/NepTrain"

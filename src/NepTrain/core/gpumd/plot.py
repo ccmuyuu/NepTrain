@@ -9,14 +9,14 @@ import numpy as np
 from ase.io import read as ase_read
 from calorine.gpumd import read_thermo
 
-
+from umap import UMAP
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 from NepTrain import utils
 from NepTrain.core.nep.utils import get_descriptor_function
 
 
-def plot_md_selected(train_xyz_path,md_xyz_path,selected_xyz_path,descriptor,save_path):
+def plot_md_selected(train_xyz_path,md_xyz_path,selected_xyz_path,descriptor,save_path,decomposition="pca"):
     # 画一下图
     config = [
         # (文件名,图例,图例颜色)
@@ -44,8 +44,11 @@ def plot_md_selected(train_xyz_path,md_xyz_path,selected_xyz_path,descriptor,sav
 
 
         fit_data.append(atoms_list_des)
+    if decomposition=="pca":
+        reducer = PCA(n_components=2)
+    else:
+        reducer = UMAP(n_components=2)
 
-    reducer = PCA(n_components=2)
     reducer.fit(np.vstack(fit_data))
     fig = plt.figure()
     for index, array in enumerate(fit_data):

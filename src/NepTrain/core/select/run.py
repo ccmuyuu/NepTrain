@@ -77,7 +77,7 @@ def run_select(argparse):
                      argparse.out_file_path,
                      descriptor,
                        png_path ,
-
+                     argparse.decomposition
                      )
     utils.print_msg(f"The point selection distribution chart is saved to {png_path}." )
     utils.print_msg(f"The selected structures are saved to {argparse.out_file_path}." )
