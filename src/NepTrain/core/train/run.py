@@ -125,8 +125,12 @@ class NepTrainWorker:
     def check_env(self):
 
 
-        if self.generation!=1 or self.config.get("restart") :
+        if self.generation!=1 and self.config.get("restart") :
             utils.print("No need for initialization check.")
+            utils.print_msg("--" * 4,
+                            f"Restarting to train the potential function for the {self.generation}th generation.",
+                            "--" * 4)
+
             return
 
         if self.config["current_job"]=="vasp":

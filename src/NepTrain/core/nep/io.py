@@ -3,16 +3,20 @@
 # @Time    : 2024/10/24 15:42
 # @Author  : 兵
 # @email    : 1747193328@qq.com
+
 import os
 import re
 import shutil
 import subprocess
 
 from rich.progress import Progress
+
 from watchdog.events import FileSystemEventHandler
+
 
 from NepTrain import utils, Config, observer
 from .utils import read_symbols_from_file
+
 
 
 

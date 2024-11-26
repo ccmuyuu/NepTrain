@@ -4,7 +4,7 @@
 # @Author  : 兵
 # @email    : 1747193328@qq.com
 import os
-from xmlrpc.client import Fault
+
 
 import numpy as np
 from ase import Atoms

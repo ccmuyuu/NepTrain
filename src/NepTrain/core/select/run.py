@@ -4,15 +4,14 @@
 # @Author  : 兵
 # @email    : 1747193328@qq.com
 import os.path
-
 from NepTrain import utils
-
 from ase.io import read as ase_read
 from ase.io import write as ase_write
 from .select import select_structures, filter_by_bonds
 from ..gpumd.plot import plot_md_selected
-from ..nep.utils import read_symbols_from_file
-from dscribe.descriptors import SOAP
+from ..nep import Nep3Calculator
+
+
 
 def run_select(argparse):
 
@@ -48,6 +47,8 @@ def run_select(argparse):
         r_cut = argparse.r_cut
         n_max = argparse.n_max
         l_max = argparse.l_max
+        from dscribe.descriptors import SOAP
+
         descriptor = SOAP(
             species=species,
             periodic=False,
@@ -55,9 +56,9 @@ def run_select(argparse):
             n_max=n_max,
             l_max=l_max,
         )
-
+        descriptor.get_descriptors = descriptor.create
     else:
-        descriptor=argparse.nep
+        descriptor=Nep3Calculator(argparse.nep)
     utils.print_msg("Starting to select points, please wait...")
 
     selected_structures = select_structures(base_train,

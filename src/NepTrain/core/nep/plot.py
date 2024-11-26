@@ -8,6 +8,7 @@
 # @Time    : 2024/6/21 16:40
 # @Author  : 兵
 # @email    : 1747193328@qq.com
+
 import glob
 import os
 
@@ -15,14 +16,17 @@ import matplotlib
 
 from NepTrain import utils
 
+
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+
 import numpy as np
-try:
-    from sklearn.metrics import r2_score, mean_squared_error
-except ImportError:
-    r2_score=None
-    mean_squared_error=None
+
+
+
+
+
+
+
 Config = [
     {"name": "energy", "unit": "eV/atom"},
     {"name": "force", "unit": "eV/A"},
@@ -31,7 +35,7 @@ Config = [
 ]
 
 
-def plot_loss_result(axes: plt.Axes):
+def plot_loss_result(axes ):
     loss = np.loadtxt("loss.out")
     axes.loglog(loss[:, 1:7],
                 label=['Total', 'L1-regularization',
@@ -44,7 +48,9 @@ def plot_loss_result(axes: plt.Axes):
     axes.legend(ncol=2, frameon=False)
 
 
-def plot_train_result(axes: plt.Axes, config: dict):
+def plot_train_result(axes , config: dict):
+    from sklearn.metrics import r2_score, mean_squared_error
+
     types = ["train", "test"]
     colors = ['deepskyblue', 'orange']
     xys = [(0.1, 0.7), (0.4, 0.1)]
@@ -79,6 +85,8 @@ def plot_train_result(axes: plt.Axes, config: dict):
 
 
 def _plot_nep_result( ):
+    import matplotlib.pyplot as plt
+
     out_num = len(glob.glob("*_train.out"))
     if os.path.exists("loss.out"):
         out_num+=1

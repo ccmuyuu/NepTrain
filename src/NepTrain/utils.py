@@ -169,7 +169,9 @@ def iter_path_to_atoms(glob_strs: list,show_progress=True,**kkwargs):
                     filter_path_list.extend(atoms)
                 else:
                     filter_path_list.append(atoms)
-
+            if len(filter_path_list)==0:
+                print_warning(f"Structure file not found: {path}")
+                return result
             if show_progress:
                 iter_obj=track(filter_path_list,
                               **kkwargs

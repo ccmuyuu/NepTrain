@@ -11,8 +11,7 @@ from watchdog.observers import Observer
 
 from NepTrain import utils
 
-__version__="1.4.4"
-
+__version__="1.4.5"
 
 
 config_path = utils.get_config_path()

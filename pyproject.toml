@@ -1,8 +1,8 @@
 [build-system]
 requires = [
     "numpy>=2.1.0",
-"setuptools>=65.0.0"
-
+"setuptools>=65.0.0",
+ "pybind11"
 ]
 build-backend = "setuptools.build_meta"
 
@@ -42,10 +42,8 @@ dependencies = [
 "ruamel.yaml",
     "dscribe",
 "umap-learn>=0.5.7"
-
-
 ]
-version = "1.4.4"
+version = "1.4.5"
 
 [project.urls]
 Homepage = "https://github.com/aboys-cb/NepTrain"
@@ -63,7 +61,7 @@ include-package-data = false
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["NepTrain", "NepTrain.*"]
+include = ["NepTrain", "NepTrain.*","nep_cpu","nep_cpu.*"]
 
 [tool.setuptools.package-data]
 "NepTrain" = ["config.ini" ]

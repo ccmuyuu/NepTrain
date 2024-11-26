@@ -10,11 +10,17 @@ from ase import Atoms
 from ase.io import read as ase_read
 from ase.io import write as ase_write
 
-from NepTrain import utils
+from NepTrain import utils, module_path
+
 from ..select import select_structures, filter_by_bonds
+
+
 from .io import RunInput
+
+
 from .plot import plot_md_selected
 from ..utils import check_env
+
 
 atoms_index = 0
 
@@ -29,7 +35,11 @@ def calculate_gpumd(atoms:Atoms,argparse):
     for temperature in argparse.temperature:
 
         run = RunInput(argparse.nep_txt_path)
-        run.read_run(argparse.run_in_path)
+        if utils.is_file_empty(argparse.run_in_path):
+            run_in_path=os.path.join(module_path,"core/gpumd/run.in")
+        else:
+            run_in_path=argparse.run_in_path
+        run.read_run(run_in_path)
         run.set_time_temp(argparse.time,temperature)
         directory=os.path.join(argparse.directory,f"{atoms_index}-{atoms.symbols}@{temperature}k-{argparse.time}ps")
         utils.print_msg(f"GPUMD is running, temperature: {temperature}k. Time: {argparse.time*run.time_step}ps" )

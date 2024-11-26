@@ -4,12 +4,13 @@
 # @Author  : 兵
 # @email    : 1747193328@qq.com
 
-
-
+import time
+import numpy as np
 from scipy.spatial.distance import cdist
 
 
-from NepTrain.core.nep.utils import get_descriptor_function
+
+
 
 
 def farthest_point_sampling(points, n_samples, min_dist=0.1, selected_data=None):
@@ -67,7 +68,7 @@ def farthest_point_sampling(points, n_samples, min_dist=0.1, selected_data=None)
     return sampled_indices
 
 
-import numpy as np
+
 
 
 
@@ -75,11 +76,11 @@ def select_structures(train, new_atoms ,descriptor, max_selected=20, min_distanc
     # 首先去掉跑崩溃的结构
 
 
-    descriptor_function=get_descriptor_function(descriptor)
 
-    train_des = np.array([np.mean(descriptor_function(i, descriptor), axis=0) for i in train])
 
-    new_des = np.array([np.mean(descriptor_function(i, descriptor), axis=0) for i in new_atoms])
+    train_des = np.array([np.mean(descriptor.get_descriptors(i ), axis=0) for i in train])
+
+    new_des = np.array([np.mean(descriptor.get_descriptors(i), axis=0) for i in new_atoms])
 
     selected_i =farthest_point_sampling(new_des,max_selected,min_distance,selected_data=train_des)
 
