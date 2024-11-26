@@ -10,7 +10,7 @@ from __future__ import annotations
 import platform
 import sys
 
-import numpy as np
+
 from setuptools import Extension, setup
 import pybind11
 import setuptools
@@ -52,7 +52,7 @@ extra_link_args = ["-Wl,--allow-multiple-definition"] if is_win_64 else []
 setup(
     author="Chen Cheng bing",
 cmdclass={'build_ext': BuildExt},
-    include_dirs=[np.get_include()],
+    # include_dirs=[np.get_include()],
 ext_modules=ext_modules,
 zip_safe=False,
 )
