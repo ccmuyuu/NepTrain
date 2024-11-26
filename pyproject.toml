@@ -38,7 +38,6 @@ dependencies = [
 "argcomplete",
 "watchdog",
 "scikit-learn",
-"calorine>=3.0",
 "ruamel.yaml",
     "dscribe",
 "umap-learn>=0.5.7"
@@ -61,7 +60,7 @@ include-package-data = false
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["NepTrain", "NepTrain.*" ]
+include = ["NepTrain", "NepTrain.*","nep_cpu.*" ]
 
 [tool.setuptools.package-data]
 "NepTrain" = ["config.ini" ]
