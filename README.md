@@ -16,7 +16,7 @@
  
 ## 安装
 
-Python包索引[PyPI]中的版本始终是相对无bug的最新稳定版本，可以通过`pip安装`:
+可以通过`pip安装`:
 
 [pypi]: https://pypi.org/project/NepTrain
 
@@ -45,29 +45,23 @@ pip install -U git+https://github.com/aboys-cb/NepTrain
 修改`vim ~/.NepTrain` 修改赝势文件路径,
 如果没有这个文件，请任意执行一次`NepTrain init`
 
+
+ 
+### 制作训练集（可选）
+针对结构或者结构文件生成微扰训练集
+
+0.03的晶格形变+0.1的原子扰动
+```sh
+NepTrain perturb ./structure/Cs16Ag8Bi8I48.vasp --num 2000 --cell 0.03 -d 0.1  
+NepTrain select perturb.xyz -max 100  
+```
+
 ### 1. 初始化
 首先先初始化下 会在当前目录下创建提交脚本
 ```sh
 NepTrain init
 ```
-```shell
-(mysci) aboy@aboy:/mnt/d/Desktop/1$ NepTrain init
-[2024-11-05 13:20:57.264180]-- 对于已有的文件我们选择跳过，如果需要强行生成覆盖，请使用-f 或者--force。
-[2024-11-05 13:20:57.270163]-- 创建./structure，请将需要跑md的扩包结构放到该文件夹！
-[2024-11-05 13:20:57.285512]-- 请检查sub_vasp.sh中的队列信息以及环境设置！
-[2024-11-05 13:20:57.289824]-- 请检查sub_gpu.sh中的队列信息以及环境设置！
-[2024-11-05 13:20:57.294086]-- 您需要检查修改job.yaml的vasp_job以及vasp.cpu_core。
-[2024-11-05 13:20:57.294713]-- 同样需要检查修改job.yaml的gpumd主动学习的设置！
-[2024-11-05 13:20:57.472578]-- 创建run.in，您可修改系综设置！温度和时间程序会修改！
-[2024-11-05 13:20:57.478132]-- 初始化完成，您在检查好文件后，运行NepTrain train job.yaml即可
-```
-### 2. 制作训练集（可选）
-针对结构或者结构文件生成微扰训练集
 
-0.03的晶格形变+0.1的原子扰动
-```sh
-NepTrain perturb ./structure/Cs16Ag8Bi8I48.vasp --num 200 --cell 0.03 -d 0.1 -o train.xyz
-```
 ### 3. 提交任务
 在修改提交脚本以及任务配置后，在登陆节点运行以下命令即可
 ```sh
