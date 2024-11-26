@@ -239,8 +239,9 @@ class NepTrainWorker:
         params.append(str(gpumd.get("step_times")[self.generation-1]))
 
         params.append("--temperature")
+        params.append( str(gpumd["temperature_every_step"][n_job] ))
 
-        params.append(" ".join([str(i) for i in gpumd["temperature_every_step"]]))
+        # params.append(" ".join([str(i) for i in gpumd["temperature_every_step"]]))
 
 
         params.append("--out")
@@ -430,10 +431,10 @@ class NepTrainWorker:
 
     def sub_gpumd(self):
         utils.print_msg(f"Starting active learning.")
+        for i in range(len(self.config["gpumd"]["temperature_every_step"])):
+            cmd = self.build_gpumd_params(i)
 
-        cmd = self.build_gpumd_params()
-
-        self.worker.sub_job(cmd, self.gpumd_path, job_type="gpumd")
+            self.worker.sub_job(cmd, self.gpumd_path, job_type="gpumd")
         self.worker.wait()
 
 
