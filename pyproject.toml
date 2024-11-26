@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-
+"wheel",
 "setuptools>=68.0.0",
 "pybind11>=2.12.0"
 ]
@@ -39,10 +39,10 @@ dependencies = [
 "watchdog",
 "scikit-learn",
 "ruamel.yaml",
-    "dscribe",
+"dscribe",
 "umap-learn>=0.5.7"
 ]
-version = "1.4.6"
+version = "1.4.7"
 
 [project.urls]
 Homepage = "https://github.com/aboys-cb/NepTrain"
@@ -67,7 +67,7 @@ include = ["NepTrain", "NepTrain.*","nep_cpu.*" ,"nep_cpu"]
 "NepTrain.core.vasp" = ["INCAR" ]
 "NepTrain.core.train" = ["job.yaml" ]
 "NepTrain.core.gpumd" = ["run.in" ]
-"nep_cpu" = ["*.*" ]
+"nep_cpu" = ["nep_cpu*.*" ]
 
 [tool.cibuildwheel.linux]
 archs = ["auto64"]
