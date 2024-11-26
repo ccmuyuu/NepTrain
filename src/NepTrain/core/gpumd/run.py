@@ -47,34 +47,10 @@ def calculate_gpumd(atoms:Atoms,argparse):
             ase_write(os.path.join(directory,"remove_by_bond_structures.xyz"),bad)
         ase_write(argparse.out_file_path,dump,append=True)
 
-        continue
-
-
-        selected = select_structures(trainxyz + new_atoms,
-                                     dump,
-                                     os.path.join(directory,"nep.txt"),
-                                     max_selected=max_selected,
-                                     min_distance=min_distance,
-                                     )
 
 
 
-        utils.print_msg(f"得到{len(selected)}个结构" )
 
-        for i, atom in enumerate(selected):
-            atom.info["Config_type"] = f"{atom.symbols}-epoch-{argparse.time}ps-{temperature}k-{i + 1}"
-        new_atoms.extend(selected)
-        ase_write(os.path.join(directory,"selected.xyz"),selected)
-
-        plot_md_selected(argparse.train_xyz_path,
-                         os.path.join(directory, "dump.xyz"),
-                         os.path.join(directory, "selected.xyz"),
-                         os.path.join(directory, "nep.txt"),
-                         os.path.join(directory, "selected.png"),
-
-                         )
-
-    utils.print_msg(f"结构：{atoms.symbols}，本次主动学习共得到{len(new_atoms)}个结构")
 
 
     return new_atoms

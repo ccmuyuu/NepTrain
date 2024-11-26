@@ -59,7 +59,7 @@ class SlurmWorker(Worker):
             job_command=["sbatch",self.vasp_sh,command]
         else:
             job_command=["sbatch",self.gpumd_sh,command]
-        print(command)
+        # print(command)
 
         result = subprocess.run(job_command, capture_output=True, text=True, check=True,cwd=job_path)
         job_id=int(result.stdout.replace("Submitted batch job ",""))

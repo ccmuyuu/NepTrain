@@ -81,7 +81,9 @@ def build_perturb(subparsers):
                              help="Write to out_file_path in append mode, default False.",
 
                              )
-
+    parser_perturb.add_argument("--filter", "-f", action="store_true",
+                               help="Whether to filter based on minimum bond length, default is False.",
+                               default=False)
 def build_vasp(subparsers):
     parser_vasp = subparsers.add_parser(
         "vasp",

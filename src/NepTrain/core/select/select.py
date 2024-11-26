@@ -3,44 +3,71 @@
 # @Time    : 2024/10/29 19:52
 # @Author  : 兵
 # @email    : 1747193328@qq.com
-import os
 
-import numpy as np
 
 
 from scipy.spatial.distance import cdist
 
+
 from NepTrain.core.nep.utils import get_descriptor_function
 
 
-
-
-
-
-# 从pynep复制的最远点采样 就使用这一个函数 因为安装不方便
-def select(new_data, now_data=[], min_distance=None, min_select=1, max_select=None):
-    """从pynep复制过来的
+def farthest_point_sampling(points, n_samples, min_dist=0.1, selected_data=None):
     """
-    metric = 'euclidean'
-    metric_para = {}
-    min_distance = min_distance
-    max_select = max_select or len(new_data)
-    to_add = []
-    if len(new_data) == 0:
-        return to_add
-    if len(now_data) == 0:
-        to_add.append(0)
-        now_data.append(new_data[0])
-    distances = np.min(cdist(new_data, now_data, metric=metric, **metric_para), axis=1)
+    最远点采样：支持已有样本扩展，并加入最小距离限制。
 
-    while np.max(distances) > min_distance or len(to_add) < min_select:
-        i = np.argmax(distances)
-        to_add.append(i)
-        if len(to_add) >= max_select:
+    参数:
+        points (ndarray): 点集，形状为 (N, D)。
+        n_samples (int): 最大采样点的数量。
+        min_dist (float): 最小距离阈值。
+        initial_indices (list or None): 已选择的样本索引列表，默认无。
+
+    返回:
+        sampled_indices (list): 采样点的索引。
+    """
+    n_points = points.shape[0]
+
+    if isinstance(selected_data, np.ndarray) and selected_data.size == 0:
+        selected_data=None
+    # 初始化采样点列表
+    sampled_indices = []
+
+    # 如果已有采样点，则计算到所有点的最小距离
+    if selected_data is not None :
+        # 使用 cdist 计算已有点与所有点之间的距离，返回形状为 (n_points, len(sampled_indices)) 的矩阵
+        distances_to_samples = cdist(points, selected_data)
+        min_distances = np.min(distances_to_samples, axis=1)  # 每个点到现有采样点集的最小距离
+
+    else:
+        # 如果没有初始点，则随机选择一个作为第一个点
+        first_index = np.random.randint(n_points)
+        sampled_indices.append(first_index)
+        # 计算所有点到第一个点的距离
+        min_distances = np.linalg.norm(points - points[first_index], axis=1)
+
+    # 进行最远点采样
+    while len(sampled_indices) < n_samples:
+        # 找到距离采样点集最远的点
+        current_index = np.argmax(min_distances)
+
+        # 如果没有点能满足最小距离要求，则提前终止
+        if min_distances[current_index] < min_dist:
             break
-        distances = np.minimum(distances, cdist([new_data[i]], new_data, metric=metric)[0])
-    return to_add
 
+        # 添加当前点到采样集
+        sampled_indices.append(current_index)
+
+        # 更新最小距离：仅计算当前点到新选择点的距离
+        # 获取当前点到所有其他点的距离
+        new_point = points[current_index]
+        new_distances = np.linalg.norm(points - new_point, axis=1)
+
+        # 更新每个点到现有样本点集的最小距离
+        min_distances = np.minimum(min_distances, new_distances)
+    return sampled_indices
+
+
+import numpy as np
 
 
 
@@ -50,30 +77,13 @@ def select_structures(train, new_atoms ,descriptor, max_selected=20, min_distanc
 
     descriptor_function=get_descriptor_function(descriptor)
 
-
-
-
     train_des = np.array([np.mean(descriptor_function(i, descriptor), axis=0) for i in train])
-
 
     new_des = np.array([np.mean(descriptor_function(i, descriptor), axis=0) for i in new_atoms])
 
-    all_des=[]
-    if train_des.size!=0:
-        all_des.append(train_des)
-    else:
-        train_des=[]
-    if new_des.size!=0:
-        all_des.append(new_des)
+    selected_i =farthest_point_sampling(new_des,max_selected,min_distance,selected_data=train_des)
 
-    all_des =np.vstack(all_des)
-
-    selected_i = select(all_des, train_des, min_distance=min_distance, max_select=max_selected,
-                        min_select=0)
-
-
-
-    return [new_atoms[i - len(train_des)] for i in selected_i]
+    return [new_atoms[i  ] for i in selected_i]
 
 # 加速计算每对元素的最小键长
 def compute_min_bond_lengths(atoms ):

@@ -53,7 +53,7 @@ def plot_md_selected(train_xyz_path,md_xyz_path,selected_xyz_path,descriptor,sav
         plt.scatter(proj[:, 0], proj[:, 1], label=config[index][1], c=config[index][2])
 
     plt.legend()
-    plt.axis('off')
+    # plt.axis('off')
     plt.savefig(save_path)
     plt.close(fig)
 
@@ -80,7 +80,7 @@ def plot_all_structure(train_data, add_data,descriptor, save_path):
     plt.scatter(proj[:, 0], proj[:, 1], label='add', c="#07cd66")
 
     plt.legend()
-    plt.axis('off')
+    # plt.axis('off')
 
     plt.savefig(save_path)
     plt.close(fig)

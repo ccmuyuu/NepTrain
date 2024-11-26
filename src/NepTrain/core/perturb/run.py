@@ -4,6 +4,7 @@
 # @Author  : 兵
 # @email    : 1747193328@qq.com
 import os
+from xmlrpc.client import Fault
 
 import numpy as np
 from ase import Atoms
@@ -11,7 +12,9 @@ from ase.io import write as ase_write
 from rich.progress import track
 
 from NepTrain import utils
-from ._hiphive import generate_mc_rattled_structures
+from NepTrain.core.select import filter_by_bonds
+
+
 def perturb_position(prim,min_distance):
 
     atoms = prim.copy()
@@ -29,28 +32,29 @@ def perturb_position(prim,min_distance):
     atoms.set_positions(perturbed_positions)
     return atoms
 
-def generate_strained_structure(prim, strain_lim):
+def generate_strained_structure(prim, strain_lim,min_distance):
     strains = np.random.uniform(*strain_lim, (3, ))
     atoms = prim.copy()
     cell_new = prim.cell[:] * (1 + strains)
     atoms.set_cell(cell_new, scale_atoms=True)
 
-    return perturb(atoms)
+    return perturb_position(atoms,min_distance)
 
 
-def generate_deformed_structure(prim, strain_lim):
+def generate_deformed_structure(prim, strain_lim,min_distance):
     R = np.random.uniform(*strain_lim, (3, 3))
     M = np.eye(3) + R
     atoms = prim.copy()
     cell_new = M @ atoms.cell[:]
     atoms.set_cell(cell_new, scale_atoms=True)
 
-    return perturb(atoms)
+    return perturb_position(atoms,min_distance)
 
 
 
-@utils.iter_path_to_atoms(["*.vasp","*.xyz"],description="Generating perturbed structures." )
-def perturb(atoms:Atoms,cell_pert_fraction=0.04, min_distance=0.1,num=50):
+@utils.iter_path_to_atoms(["*.vasp","*.xyz"],show_progress=False )
+def perturb(atoms:Atoms,cell_pert_fraction=0.04, min_distance=0.1,num=50,filter_bonds=False):
+    cell_pert_fraction=[-cell_pert_fraction,cell_pert_fraction]
     structures_rattle=[]
     for i in track(range(num),description=f"Current structure:{atoms.symbols}"):
         if i%2==0:
@@ -61,6 +65,10 @@ def perturb(atoms:Atoms,cell_pert_fraction=0.04, min_distance=0.1,num=50):
             structure=generate_strained_structure(atoms,cell_pert_fraction,min_distance)
             structure.info['Config_type'] = f"perturb {i+1} strained {cell_pert_fraction}  min_distance {min_distance}"
 
+        structures_rattle.append(structure)
+    if filter_bonds:
+        structures_rattle, bad = filter_by_bonds(structures_rattle, model=atoms)
+
 
     return structures_rattle
 def run_perturb(argparse):
@@ -68,8 +76,9 @@ def run_perturb(argparse):
     result = perturb(argparse.model_path,
                      cell_pert_fraction=argparse.cell_pert_fraction,
                      min_distance=argparse.min_distance,
-                     rattle_std=argparse.rattle_std,
+
                      num=argparse.num,
+                     filter_bonds=argparse.filter
                      )
     path=os.path.dirname(argparse.out_file_path)
 
