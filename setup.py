@@ -28,6 +28,7 @@ ext_modules = [
         ["src/nep_cpu/nep_bindings.cpp"],  # 源文件
         include_dirs=[
             pybind11_include,
+            "src/nep_cpu"
         ],
         extra_compile_args=["-O3", "-Wall", "-std=c++17"],  # 编译选项
         extra_link_args=[],
