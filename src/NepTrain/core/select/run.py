@@ -64,9 +64,9 @@ def run_select(argparse):
     else:
         descriptor=Nep3Calculator(argparse.nep)
     utils.print_msg("Starting to select points, please wait...")
-    train_structure_des = np.array([np.mean(descriptor.get_descriptors(i ), axis=0) for i in base_train])
+    train_structure_des = np.array([ descriptor.get_structure_descriptors(i )  for i in base_train])
     #
-    new_structure_des = np.array([np.mean(descriptor.get_descriptors(i), axis=0) for i in trajectory])
+    new_structure_des = np.array([ descriptor.get_structure_descriptors(i)  for i in trajectory])
     # train_structure_des =  np.array(Parallel(n_jobs=-1 )(delayed(Nep3Calculator.get_structure_descriptors_nep)(i,argparse.nep) for i in base_train))
     # new_structure_des =  np.array(Parallel(n_jobs=-1 )(delayed(Nep3Calculator.get_structure_descriptors_nep)(i,argparse.nep) for i in trajectory))
 

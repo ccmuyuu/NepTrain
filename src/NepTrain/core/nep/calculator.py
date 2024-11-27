@@ -35,7 +35,3 @@ class Nep3Calculator:
     def get_structure_descriptors(self, structure):
         descriptors_per_atom=self.get_descriptors(structure)
         return descriptors_per_atom.mean(axis=0)
-    @classmethod
-    def get_structure_descriptors_nep(cls, structure,model_file="nep.txt"):
-        nep=cls(model_file)
-        return nep.get_structure_descriptors(structure)
