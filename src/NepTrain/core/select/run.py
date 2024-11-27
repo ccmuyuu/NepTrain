@@ -4,10 +4,14 @@
 # @Author  : 兵
 # @email    : 1747193328@qq.com
 import os.path
+
+import numpy as np
+# from joblib import Parallel, delayed
+
 from NepTrain import utils
 from ase.io import read as ase_read
 from ase.io import write as ase_write
-from .select import select_structures, filter_by_bonds
+from .select import select_structures, filter_by_bonds, farthest_point_sampling
 from ..gpumd.plot import plot_md_selected
 from ..nep import Nep3Calculator
 
@@ -60,23 +64,24 @@ def run_select(argparse):
     else:
         descriptor=Nep3Calculator(argparse.nep)
     utils.print_msg("Starting to select points, please wait...")
+    train_structure_des = np.array([np.mean(descriptor.get_descriptors(i ), axis=0) for i in base_train])
+    #
+    new_structure_des = np.array([np.mean(descriptor.get_descriptors(i), axis=0) for i in trajectory])
+    # train_structure_des =  np.array(Parallel(n_jobs=-1 )(delayed(Nep3Calculator.get_structure_descriptors_nep)(i,argparse.nep) for i in base_train))
+    # new_structure_des =  np.array(Parallel(n_jobs=-1 )(delayed(Nep3Calculator.get_structure_descriptors_nep)(i,argparse.nep) for i in trajectory))
 
-    selected_structures = select_structures(base_train,
-                                            trajectory,
-                                            descriptor,
-                      max_selected=argparse.max_selected,
-                      min_distance=argparse.min_distance,
-                      )
+
+    selected_i =farthest_point_sampling(new_structure_des,argparse.max_selected,argparse.min_distance,selected_data=train_structure_des)
+    selected_structures =[trajectory[i] for i in selected_i]
+    selected_des=new_structure_des[selected_i,:]
+
 
     utils.print_msg(f"Obtained {len(selected_structures)} structures." )
-
     ase_write(argparse.out_file_path, selected_structures)
     png_path=os.path.join(os.path.dirname(argparse.out_file_path),"selected.png")
-    plot_md_selected(argparse.base,
-                     argparse.trajectory_path,
-
-                     argparse.out_file_path,
-                     descriptor,
+    plot_md_selected(train_structure_des,
+                     new_structure_des,
+                     selected_des,
                        png_path ,
                      argparse.decomposition
                      )

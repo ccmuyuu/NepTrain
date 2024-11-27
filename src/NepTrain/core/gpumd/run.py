@@ -18,7 +18,6 @@ from ..select import select_structures, filter_by_bonds
 from .io import RunInput
 
 
-from .plot import plot_md_selected
 from ..utils import check_env
 
 

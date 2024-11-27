@@ -17,7 +17,10 @@ from NepTrain import utils
 from .utils import  read_thermo
 
 
-def plot_md_selected(train_xyz_path,md_xyz_path,selected_xyz_path,descriptor,save_path,decomposition="pca"):
+
+
+
+def plot_md_selected(train_des,md_des,selected_des, save_path,decomposition="pca"):
     # 画一下图
     from matplotlib import pyplot as plt
 
@@ -25,25 +28,23 @@ def plot_md_selected(train_xyz_path,md_xyz_path,selected_xyz_path,descriptor,sav
         # (文件名,图例,图例颜色)
 
     ]
-    if not utils.is_file_empty(train_xyz_path):
-        config.append((train_xyz_path, "base dataset","gray"))
+    if train_des is not None and train_des.size!=0:
+        config.append((train_des, "base dataset","gray"))
 
-    if not utils.is_file_empty(md_xyz_path):
-        config.append((md_xyz_path, 'new dataset', "#07cd66"))
+    if md_des is not None  and md_des.size!=0:
+        config.append((md_des, 'new dataset', "#07cd66"))
 
-    if not utils.is_file_empty(selected_xyz_path):
-        config.append((selected_xyz_path,'selected', "red"))
+    if selected_des is not None  and selected_des.size!=0:
+        config.append((selected_des,'selected', "red"))
 
     fit_data = []
 
-
-
-
     for info in config:
-        atoms_list = ase_read(info[0], ":", format="extxyz", do_not_split_by_at_sign=True)
 
         # atoms_list_des = np.vstack([get_descriptors(i, nep_txt_path) for i in atoms_list])
-        atoms_list_des = np.array([np.mean(descriptor.get_descriptors(i), axis=0) for i in atoms_list])
+
+        atoms_list_des= info[0]
+        # print(atoms_list_des.shape)
 
 
         fit_data.append(atoms_list_des)

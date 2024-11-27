@@ -74,17 +74,17 @@ def farthest_point_sampling(points, n_samples, min_dist=0.1, selected_data=None)
 
 def select_structures(train, new_atoms ,descriptor, max_selected=20, min_distance=0.01 ):
     # 首先去掉跑崩溃的结构
+    if descriptor is None:
+        train_des=np.mean(train,axis=1)
+        new_des=np.mean(new_atoms,axis=1)
+    else:
+        train_des = np.array([np.mean(descriptor.get_descriptors(i ), axis=0) for i in train])
 
-
-
-
-    train_des = np.array([np.mean(descriptor.get_descriptors(i ), axis=0) for i in train])
-
-    new_des = np.array([np.mean(descriptor.get_descriptors(i), axis=0) for i in new_atoms])
-
+        new_des = np.array([np.mean(descriptor.get_descriptors(i), axis=0) for i in new_atoms])
+    print(train_des.shape)
     selected_i =farthest_point_sampling(new_des,max_selected,min_distance,selected_data=train_des)
 
-    return [new_atoms[i  ] for i in selected_i]
+    return [new_atoms[i] for i in selected_i]
 
 # 加速计算每对元素的最小键长
 def compute_min_bond_lengths(atoms ):
