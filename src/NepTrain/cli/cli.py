@@ -5,7 +5,7 @@
 # @email    : 1747193328@qq.com
 import argparse
 import sys
-# sys.path.append('../../')
+sys.path.append('../../')
 from NepTrain.core import *
 from NepTrain import __version__
 

@@ -6,6 +6,8 @@
 import os.path
 
 import numpy as np
+
+
 # from joblib import Parallel, delayed
 
 from NepTrain import utils
@@ -14,7 +16,7 @@ from ase.io import write as ase_write
 from .select import select_structures, filter_by_bonds, farthest_point_sampling
 from ..gpumd.plot import plot_md_selected
 from ..nep import Nep3Calculator
-
+from ..nep.calculator import DescriptorCalculator
 
 
 def run_select(argparse):
@@ -46,27 +48,28 @@ def run_select(argparse):
         for atoms in trajectory+base_train:
             for i in atoms.get_chemical_symbols():
                 species.add(i)
+        kwargs_dict={
+            "species":list(species),
+            "r_cut":argparse.r_cut,
+            "n_max": argparse.n_max,
+            "l_max": argparse.l_max
 
-        species = list(species)
-        r_cut = argparse.r_cut
-        n_max = argparse.n_max
-        l_max = argparse.l_max
-        from dscribe.descriptors import SOAP
+        }
 
-        descriptor = SOAP(
-            species=species,
-            periodic=False,
-            r_cut=r_cut,
-            n_max=n_max,
-            l_max=l_max,
-        )
-        descriptor.get_descriptors = descriptor.create
+        descriptor =DescriptorCalculator("soap",**kwargs_dict)
+
     else:
-        descriptor=Nep3Calculator(argparse.nep)
+        descriptor =DescriptorCalculator("nep", model_file=argparse.nep)
+
+    utils.print_msg("Start generating structure descriptor, please wait")
+    train_structure_des =descriptor.get_structures_descriptors(base_train)
+    new_structure_des =descriptor.get_structures_descriptors(trajectory)
+
     utils.print_msg("Starting to select points, please wait...")
-    train_structure_des = np.array([ descriptor.get_structure_descriptors(i )  for i in base_train])
+
+    # train_structure_des = np.array([ descriptor.get_structure_descriptors(i )  for i in base_train])
     #
-    new_structure_des = np.array([ descriptor.get_structure_descriptors(i)  for i in trajectory])
+    # new_structure_des = np.array([ descriptor.get_structure_descriptors(i)  for i in trajectory])
     # train_structure_des =  np.array(Parallel(n_jobs=-1 )(delayed(Nep3Calculator.get_structure_descriptors_nep)(i,argparse.nep) for i in base_train))
     # new_structure_des =  np.array(Parallel(n_jobs=-1 )(delayed(Nep3Calculator.get_structure_descriptors_nep)(i,argparse.nep) for i in trajectory))
 

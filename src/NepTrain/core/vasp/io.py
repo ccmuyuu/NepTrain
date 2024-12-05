@@ -20,6 +20,7 @@ class VaspInput(Vasp):
         super(VaspInput,self).__init__(*args,**kwargs)
         self.input_params["setups"] = {"base": "recommended"}
         self.input_params["pp"] = ''
+
         os.environ[self.VASP_PP_PATH] = os.path.expanduser(Config.get("environ", "potcar_path"))
 
 

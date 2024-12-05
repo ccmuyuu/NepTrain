@@ -5,11 +5,4 @@
     <orderEntry type="jdk" jdkName="Python 3.10.13 WSL (Ubuntu-22.04): (/home/aboy/anaconda3/envs/mysci/bin/python)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
-  <component name="PyNamespacePackagesService">
-    <option name="namespacePackageFolders">
-      <list>
-        <option value="$MODULE_DIR$/src" />
-      </list>
-    </option>
-  </component>
 </module>
