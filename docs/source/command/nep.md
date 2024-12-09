@@ -1,6 +1,7 @@
 # nep
 **Description:**  
 Trains potential functions using NEP.
+## Input Parameters
 
 **Usage:**  
 ```bash
@@ -24,5 +25,6 @@ NepTrain nep [options]
   Path to restart file. Default: `None`.
 - `-cs, --continue_step`  
   Steps to continue from restart. Default: `10000`.
+## Output
 
  

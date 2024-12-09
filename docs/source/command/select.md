@@ -1,6 +1,7 @@
 # select
 **Description:**  
 Selects samples from trajectory files.
+## Input Parameters
 
 **Usage:**  
 ```bash
@@ -31,3 +32,4 @@ NepTrain select <trajectory_path> [options]
     Number of radial basis functions. Default: `8`.
   - `-l, --l_max`  
     Maximum degree of spherical harmonics. Default: `6`.
+## Output

@@ -228,7 +228,7 @@ def build_gpumd(subparsers):
                              help="Potential function path, default is ./nep.txt.",
                              default="./nep.txt"
                              )
-    parser_gpumd.add_argument("--time", "-t", type=int, help="Molecular dynamics time, unit Å, default 10 ps.", default=10)
+    parser_gpumd.add_argument("--time", "-t", type=int, help="Molecular dynamics time, unit ps, default 10 ps.", default=10)
     parser_gpumd.add_argument("--temperature", "-T", type=int, help="Molecular dynamics temperature in Kelvin,multiple integers can be input. default is 300 K", nargs="*", default=[300])
     parser_gpumd.add_argument("--filter", "-f", action="store_true",
                                help="Whether to filter based on minimum bond length, default is False.",

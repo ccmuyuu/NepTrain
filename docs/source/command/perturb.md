@@ -1,6 +1,7 @@
 # perturb
 **Description:**  
 Generates perturbed structures.
+## Input Parameters
 
 **Usage:**  
 ```bash
@@ -22,3 +23,4 @@ NepTrain perturb <model_path> [options]
   Append to output file instead of overwriting. Default: `False`.
 - `-f, --filter`  
   Filter structures based on minimum bond length. Default: `False`.
+## Output

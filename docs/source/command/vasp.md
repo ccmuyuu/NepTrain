@@ -1,7 +1,7 @@
 # vasp
 **Description:**  
 Performs single-point energy calculations using VASP.
-
+## Input Parameters
 **Usage:**  
 ```bash
 NepTrain vasp <model_path> [options]
@@ -26,3 +26,4 @@ NepTrain vasp <model_path> [options]
   Set k-spacing value.
 - `-ka`  
   Set k-points as 1 or 3 numbers (comma-separated). Default: `[1, 1, 1]`.
+## Output

@@ -10,11 +10,11 @@
 project = 'NepTrainKit'
 copyright = '2024, ChengBing Chen,YuTong Li'
 author = 'ChengBing Chen'
-release = '1.4.9'
+release = '1.5.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
-
+html_show_sourcelink = False
 extensions = [
     # 'sphinx.ext.autodoc',
     # 'sphinx.ext.napoleon',
