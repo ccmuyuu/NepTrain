@@ -1,6 +1,8 @@
 [build-system]
 requires = [
 "wheel",
+"numpy",
+
 "setuptools>=68.0.0",
 "pybind11>=2.12.0"
 ]
