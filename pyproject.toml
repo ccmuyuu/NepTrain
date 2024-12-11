@@ -44,7 +44,7 @@ dependencies = [
 "dscribe",
 "umap-learn>=0.5.7"
 ]
-version = "1.5.0"
+version = "1.5.1"
 
 [project.urls]
 Homepage = "https://github.com/aboys-cb/NepTrain"

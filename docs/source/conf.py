@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 
-project = 'NepTrainKit'
-copyright = '2024, ChengBing Chen,YuTong Li'
-author = 'ChengBing Chen'
+project = 'NepTrain'
+copyright = '2024, ChengBing Chen'
+author = 'ChengBing Chen,YuTong Li'
 release = '1.5.0'
 
 # -- General configuration ---------------------------------------------------

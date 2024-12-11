@@ -13,7 +13,7 @@ from ase.io import write as ase_write
 
 from NepTrain import utils, Config, module_path
 from ..utils import check_env
-from .io import VaspInput
+from .io import VaspInput,write_to_xyz
 
 atoms_index=1
 
@@ -43,23 +43,28 @@ def calculate_vasp(atoms:Atoms,argparse):
              gamma=argparse.use_gamma,
              )
 
-    vasp.calculate(atoms,('energy'))
-    atoms.calc=vasp._xml_calc
-    xx, yy, zz, yz, xz, xy = -vasp.results['stress'] * atoms.get_volume()  # *160.21766
-    atoms.info['virial'] = np.array([(xx, xy, xz), (xy, yy, yz), (xz, yz, zz)])
-    #这里没想好怎么设计config的格式化  就先使用原来的
-    if "Config_type" not in atoms.info:
 
-        atoms.info['Config_type'] = "NepTrain scf "
-    atoms.info['Weight'] = 1.0
-    del atoms.calc.results['stress']
-    del atoms.calc.results['free_energy']
+    if vasp.int_params["ibrion"] ==0:
+        #分子动力学
+        vasp.calculate(atoms, ('energy'))
 
-
-    if vasp.converged:
-        return atoms
+        atoms_list = write_to_xyz(os.path.join(directory,"vasprun.xml"),f"aimd_{vasp.float_params['tebeg']}k_{vasp.float_params['teend']}k.xyz","aimd",False)
+        return atoms_list
     else:
-        raise ValueError(f"{directory}: VASP not converged")
+        vasp.calculate(atoms, ('energy'))
+        atoms.calc = vasp._xml_calc
+        xx, yy, zz, yz, xz, xy = -vasp.results['stress'] * atoms.get_volume()  # *160.21766
+        atoms.info['virial'] = np.array([(xx, xy, xz), (xy, yy, yz), (xz, yz, zz)])
+        # 这里没想好怎么设计config的格式化  就先使用原来的
+        if "Config_type" not in atoms.info:
+            atoms.info['Config_type'] = "NepTrain scf "
+        atoms.info['Weight'] = 1.0
+        del atoms.calc.results['stress']
+        del atoms.calc.results['free_energy']
+        if vasp.converged:
+            return atoms
+        else:
+            raise ValueError(f"{directory}: VASP not converged")
 def run_vasp(argparse):
     check_env()
 
@@ -67,9 +72,8 @@ def run_vasp(argparse):
     path=os.path.dirname(argparse.out_file_path)
     if path and  not os.path.exists(path):
         os.makedirs(path)
-
-
-
+    if isinstance(result[0],list):
+        result=[atoms for _list in result for atoms in _list]
     ase_write(argparse.out_file_path,result,format="extxyz",append=argparse.append)
 
     utils.print_success("VASP calculation task completed!" )
