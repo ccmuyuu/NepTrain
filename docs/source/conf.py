@@ -8,12 +8,14 @@
 
 
 project = 'NepTrain'
-copyright = '2024, ChengBing Chen'
-author = 'ChengBing Chen,YuTong Li'
+copyright = '2024, NepTrain Team'
+author = ",".join(['ChengBing Chen','YuTong Li'])
 release = '1.5.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+ 
+
 html_show_sourcelink = False
 extensions = [
     # 'sphinx.ext.autodoc',
@@ -47,7 +49,9 @@ language = 'en'
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-
+html_context = {
+    "author_name": author,
+}
 source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',
