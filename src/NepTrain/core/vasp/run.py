@@ -39,7 +39,7 @@ def calculate_vasp(atoms:Atoms,argparse):
              command=command,
             kpts=(math.ceil(argparse.ka[0]/a)  ,
                   math.ceil(argparse.ka[1]/b)  ,
-                  math.ceil(argparse.ka[2]/b) ),
+                  math.ceil(argparse.ka[2]/c) ),
              gamma=argparse.use_gamma,
              )
 
@@ -48,7 +48,7 @@ def calculate_vasp(atoms:Atoms,argparse):
         #分子动力学
         vasp.calculate(atoms, ('energy'))
 
-        atoms_list = write_to_xyz(os.path.join(directory,"vasprun.xml"),f"aimd_{vasp.float_params['tebeg']}k_{vasp.float_params['teend']}k.xyz","aimd",False)
+        atoms_list = write_to_xyz(os.path.join(directory,"vasprun.xml"),os.path.join(directory,f"aimd_{vasp.float_params['tebeg']}k_{vasp.float_params['teend']}k.xyz"),"aimd",False)
         return atoms_list
     else:
         vasp.calculate(atoms, ('energy'))
@@ -72,7 +72,7 @@ def run_vasp(argparse):
     path=os.path.dirname(argparse.out_file_path)
     if path and  not os.path.exists(path):
         os.makedirs(path)
-    if isinstance(result[0],list):
+    if len(result) and isinstance(result[0],list):
         result=[atoms for _list in result for atoms in _list]
     ase_write(argparse.out_file_path,result,format="extxyz",append=argparse.append)
 
