@@ -31,9 +31,11 @@ def plot_md_selected(train_des,md_des,selected_des, save_path,decomposition="pca
     if train_des is not None and train_des.size!=0:
         config.append((train_des, "base dataset","gray"))
 
-    if md_des is not None  and md_des.size!=0:
-        config.append((md_des, 'new dataset', "#07cd66"))
-
+    if md_des is not None:
+        if isinstance(md_des,np.ndarray) and md_des.size!=0:
+            config.append((md_des, 'new dataset', "#07cd66"))
+        elif isinstance(md_des,list) :
+            config.extend(md_des)
     if selected_des is not None  and selected_des.size!=0:
         config.append((selected_des,'selected', "red"))
 
@@ -62,8 +64,8 @@ def plot_md_selected(train_des,md_des,selected_des, save_path,decomposition="pca
     for index, array in enumerate(fit_data):
         proj = reducer.transform(array)
         plt.scatter(proj[:, 0], proj[:, 1], label=config[index][1], c=config[index][2])
-
-    plt.legend()
+    leg_cols=len(config)//3
+    plt.legend(ncols=leg_cols)
     # plt.axis('off')
     plt.savefig(save_path)
     plt.close(fig)

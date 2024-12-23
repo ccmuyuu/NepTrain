@@ -54,7 +54,7 @@ NepTrain gpumd structure
 To run MD simulations for all structures at temperatures ranging from 100 K to 600 K with a step of 100 K, you can use either of the following commands:
 
 ```shell
-NepTrain gpumd structure -T 100 200 300 400 500 600
+NepTrain gpumd structure -T 100 200 300 400 500 600 
 ```
 
 Or use a shell shortcut to create an array:

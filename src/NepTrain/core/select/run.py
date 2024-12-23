@@ -4,6 +4,7 @@
 # @Author  : 兵
 # @email    : 1747193328@qq.com
 import os.path
+from pathlib import Path
 
 import numpy as np
 
@@ -15,33 +16,35 @@ from ase.io import read as ase_read
 from ase.io import write as ase_write
 from .select import select_structures, filter_by_bonds, farthest_point_sampling
 from ..gpumd.plot import plot_md_selected
-from ..nep import Nep3Calculator
+
 from ..nep.calculator import DescriptorCalculator
 
 
 def run_select(argparse):
+    import matplotlib.pyplot as plt
+    map_path_index=[]
+    all_trajectory=[]
+    plot_config=[]
+    trajectory_structures=[]
+    for index,_path in enumerate(argparse.trajectory_paths):
 
-    if utils.is_file_empty(argparse.trajectory_path):
-        raise FileNotFoundError(f"An invalid file path was provided: {argparse.trajectory_path}.")
-    utils.print_msg("Reading the file, please wait...")
+        if utils.is_file_empty(_path):
+            utils.print_warning(f"An invalid file path was provided: {argparse.trajectory_path}.")
+            continue
 
-    trajectory=ase_read(argparse.trajectory_path,":",format="extxyz")
+        utils.print_msg(f"Reading trajectory {_path}")
 
-    # if argparse.filter:
-    # #转移到gpumd的模块
-    #     atoms=ase_read(argparse.base_structure,)
-    #     good, bad = filter_by_bonds(trajectory, model=atoms)
-    #     directory=os.path.dirname(argparse.trajectory_path)
-    #     trajectory=good
-    #     ase_write(os.path.join(directory, "good_structures.xyz"), good,append=False)
-    #     ase_write(os.path.join(directory, "remove_by_bond_structures.xyz"), bad,append=False)
-    #     utils.print_msg(f"Bond length filtering activated, {len(bad)} structures filtered out, saved to {os.path.join(directory, 'remove_by_bond_structures.xyz')}.")
+        trajectory=ase_read(_path,":",format="extxyz")
+        map_path_index.append(np.full(len(trajectory),index))
+        trajectory_structures.extend(trajectory)
+    map_path_index=np.concatenate(map_path_index)
 
 
     if utils.is_file_empty(argparse.base):
         base_train=[]
     else:
         base_train=ase_read(argparse.base,":",format="extxyz")
+
     if utils.is_file_empty(argparse.nep):
         utils.print_msg("An invalid path for nep.txt was provided, using SOAP descriptors instead.")
         species=set()
@@ -63,27 +66,54 @@ def run_select(argparse):
 
     utils.print_msg("Start generating structure descriptor, please wait")
     train_structure_des =descriptor.get_structures_descriptors(base_train)
-    new_structure_des =descriptor.get_structures_descriptors(trajectory)
+    trajectory_structure_des=[]
+    uniqe_index = np.unique(map_path_index)
+
+    # 使用 'viridis' colormap 从色图中获取颜色
+    cmap = plt.cm.viridis  # 你也可以选择其他色图，例如 'plasma', 'inferno', 'cividis' 等
+    num_colors = len(uniqe_index)
+
+    # 创建颜色数组
+    colors = [cmap(i / num_colors) for i in range(num_colors)]
+    for index  in uniqe_index:
+        indices = np.where(map_path_index == index)[0]
+        trajectory_structure=[trajectory_structures[i] for i in indices]
+        new =descriptor.get_structures_descriptors(trajectory_structure)
+        trajectory_structure_des.append(new)
+        label = Path(argparse.trajectory_paths[index]).name
+
+        plot_config.append((new,label, colors[index]))
 
     utils.print_msg("Starting to select points, please wait...")
-
-    # train_structure_des = np.array([ descriptor.get_structure_descriptors(i )  for i in base_train])
-    #
-    # new_structure_des = np.array([ descriptor.get_structure_descriptors(i)  for i in trajectory])
-    # train_structure_des =  np.array(Parallel(n_jobs=-1 )(delayed(Nep3Calculator.get_structure_descriptors_nep)(i,argparse.nep) for i in base_train))
-    # new_structure_des =  np.array(Parallel(n_jobs=-1 )(delayed(Nep3Calculator.get_structure_descriptors_nep)(i,argparse.nep) for i in trajectory))
+    new_structure_des=np.vstack(trajectory_structure_des)
 
 
     selected_i =farthest_point_sampling(new_structure_des,argparse.max_selected,argparse.min_distance,selected_data=train_structure_des)
-    selected_structures =[trajectory[i] for i in selected_i]
+
+    selected_structures=[]
+
+    base_dir=os.path.dirname(argparse.out_file_path)
+
+    utils.remove_file_by_re(os.path.join(base_dir,"selected*.xyz"))
+
+    for i in selected_i:
+        file_index=map_path_index[i]
+
+        fila_name = Path(argparse.trajectory_paths[file_index]).name
+        save_path=os.path.join(base_dir,f"selected_{fila_name}.xyz")
+
+
+        structure = trajectory_structures[i]
+        ase_write(save_path,structure,append=True)
+        selected_structures.append(structure)
     selected_des=new_structure_des[selected_i,:]
 
 
-    utils.print_msg(f"Obtained {len(selected_structures)} structures." )
+    utils.print_msg(f"Obtained {len(selected_i)} structures." )
     ase_write(argparse.out_file_path, selected_structures)
     png_path=os.path.join(os.path.dirname(argparse.out_file_path),"selected.png")
     plot_md_selected(train_structure_des,
-                     new_structure_des,
+                     plot_config,
                      selected_des,
                        png_path ,
                      argparse.decomposition

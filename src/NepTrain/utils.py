@@ -102,7 +102,12 @@ def copy_files(src_dir, dst_dir):
             # 复制文件
             shutil.copy2(src_file, dst_file)
 
+def remove_file_by_re(src):
 
+
+    src_file_list =  glob.glob(src)
+    for file in src_file_list:
+        Path(file).unlink()
 
 
 

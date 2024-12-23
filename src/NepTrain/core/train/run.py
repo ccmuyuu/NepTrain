@@ -261,9 +261,10 @@ class NepTrainWorker:
         params=[]
         params.append("NepTrain")
         params.append("select")
-
-        params.append(self.select_all_md_dummp_xyz_file)
-
+        #总的
+        # params.append(self.select_all_md_dummp_xyz_file)
+        #分开
+        params.append(self.__getattr__(f"select_md_*_xyz_file"))
         params.append("--nep")
         params.append( self.nep_nep_txt_file)
 

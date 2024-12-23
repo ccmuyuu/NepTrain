@@ -8,7 +8,10 @@ import sys
 sys.path.append('../../')
 from NepTrain.core import *
 from NepTrain import __version__
+import warnings
 
+# 禁用所有 UserWarning
+warnings.simplefilter('ignore', UserWarning)
 def check_kpoints_number(value):
     """检查值是否为单个数字或三个数字的字符串"""
 
@@ -261,8 +264,8 @@ def build_select(subparsers):
     )
     parser_select.set_defaults(func=run_select,decomposition='pca')
 
-    parser_select.add_argument("trajectory_path",
-                             type=str,
+    parser_select.add_argument("trajectory_paths",
+                              nargs="+",
                              help="The trajectory file needed for sampling is in xyz format.")
 
 
