@@ -266,7 +266,7 @@ def build_select(subparsers):
 
     parser_select.add_argument("trajectory_paths",
                               nargs="+",
-                             help="The trajectory file needed for sampling is in xyz format.")
+                             help="The trajectory files needed for sampling is in xyz format.")
 
 
     parser_select.add_argument("--base", "-base",
