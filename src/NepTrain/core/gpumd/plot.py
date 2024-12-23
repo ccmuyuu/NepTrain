@@ -64,7 +64,7 @@ def plot_md_selected(train_des,md_des,selected_des, save_path,decomposition="pca
     for index, array in enumerate(fit_data):
         proj = reducer.transform(array)
         plt.scatter(proj[:, 0], proj[:, 1], label=config[index][1], c=config[index][2])
-    leg_cols=len(config)//3
+    leg_cols=len(config)//3 or 1
     plt.legend(ncols=leg_cols)
     # plt.axis('off')
     plt.savefig(save_path)
