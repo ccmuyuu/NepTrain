@@ -14,9 +14,9 @@
 [github discussion]: https://github.com/aboys-cb/NepTrain/discussions
 
  
-## 安装
+## Installation
 
-可以通过`pip安装`:
+You can install it via `pip`:
 
 [pypi]: https://pypi.org/project/NepTrain
 
@@ -24,73 +24,54 @@
 pip install NepTrain
 ```
 
-如果你想在主分支上使用最新未发布的更改，你可以直接从GitHub安装:
+If you want to use the latest changes from the main branch, you can install it directly from GitHub:
 
 ```sh
 pip install -U git+https://github.com/aboys-cb/NepTrain
 ```
-### 社区支持
+### Community Support
 
-- [点击加入VASPTool群聊](https://qm.qq.com/q/wPDQYHMhyg)
-- 通过issue提出问题和讨论交流
+- Join the VASPTool community chat (https://qm.qq.com/q/wPDQYHMhyg)
+- Raise issues and engage in discussions via GitHub issues
 
-## 软件架构
+## Software Architecture
 
-建议使用 Python 3.10 以上版本。旧版本可能会报错类型错误。
-推荐使用GPUMD3.9.5以上的版本。
-
- 
-## 使用方式
-
-修改`vim ~/.NepTrain` 修改赝势文件路径,
-如果没有这个文件，请任意执行一次`NepTrain init`
-
+It is recommended to use Python 3.10 or higher. Older versions might cause type errors.
+We also recommend using GPUMD version 3.9.5 or higher.
 
  
-### 制作训练集（可选）
-针对结构或者结构文件生成微扰训练集
+## Usage
 
-0.03的晶格形变+0.1的原子扰动
+Modify the `vim ~/.NepTrain` file to change the pseudopotential file path.
+If this file doesn't exist, simply run `NepTrain init` once to generate it.
+
+
+ 
+### Creating Training Set (Optional)
+Generate a perturbation training set for structures or structure files.
+
+For example, apply a 0.03 lattice distortion and 0.1 atomic perturbation:
 ```sh
 NepTrain perturb ./structure/Cs16Ag8Bi8I48.vasp --num 2000 --cell 0.03 -d 0.1  
 NepTrain select perturb.xyz -max 100  
 ```
 
-### 1. 初始化
-首先先初始化下 会在当前目录下创建提交脚本
+### 1. Initialization
+First, initialize NepTrain. This will create a submission script in the current directory:
 ```sh
 NepTrain init
 ```
 
-### 3. 提交任务
-在修改提交脚本以及任务配置后，在登陆节点运行以下命令即可
+### 3. Submit Job
+After modifying the submission script and job configuration, you can submit the job by running the following command on a login node:
 ```sh
 NepTrain train job.yaml
 ```
-如果是后台运行 配合nohup即可
+For running the job in the background, use `nohup`
 ```sh
 nohup NepTrain train job.yaml &
 ```
-如果中途出现异常停止了，目录下有一个restart.yaml 执行以下命令即可
+If the job is interrupted, there will be a  `restart.yaml` file in the directory. To resume the job, run:
 ```sh
 NepTrain train restart.yaml
 ```
-## 以下是单独使用部分功能的命令demo
-- 很多参数都是默认的可通过-h查看  比如`NepTrain vasp -h`
-
-### 计算VASP单点能
-
-```sh
-NepTrain vasp demo.xyz -np 64 -g --kpoints 20  
-```
-如果想修改执行目录 输出目录 以及指定incar 参考以下命令
-```sh
-NepTrain vasp demo.xyz -np 64 --directory ./cache -g --incar=./INCAR --kpoints 20 -o ./result/result.xyz
-```
- 
-### 执行主动学习
-对./structure的结构跑300k、500k 10ps的md
-```sh
-NepTrain gpumd ./structure  -t 10 -T 300 500
-```
-更多细节参数执行`NepTrain gpumd -h`
