@@ -14,6 +14,7 @@ Welcome to NepTrain – an advanced automation toolkit for training neural netwo
 
    install    <install/index>
    command    <command/index>
+   example    <example/index>
 
 
 

@@ -31,7 +31,7 @@ pip install -U git+https://github.com/aboys-cb/NepTrain
 ```
 ### Community Support
 
-- Join the VASPTool community chat (https://qm.qq.com/q/wPDQYHMhyg)
+- Join the community chat (https://qm.qq.com/q/wPDQYHMhyg)
 - Raise issues and engage in discussions via GitHub issues
 
 ## Software Architecture
