@@ -1,9 +1,13 @@
 # CsPbI3
 
-# 准备工作
+## 准备工作
+:::{note}
+首先我们创建个工作路径叫CsPbI3.后面的操作都默认在这个目录下。
+:::
+
 我们这里以立方相的$CsPbI_3$为例介绍整个自动化训练框架的使用
 首先我们从[Materials Project](https://next-gen.materialsproject.org/materials/mp-1069538?chemsys=Cs-Pb-I)下载cif文件。
-然后在VESTA扩包[3,3,2]作为后面的训练的初始结构。
+然后在VESTA扩包[3,3,2]作为后面的训练的初始结构,文件名为`CsPbI3.vasp`。
 扩包后的结构如下
 ```text
 Cs1 Pb1 I3
@@ -107,3 +111,46 @@ Direct
 
 
 ```
+
+## 生成微扰训练集
+我们先生成10000个微扰训练集，3%的形变，0.2Å的原子微扰。
+:::{tip}
+这里选择加入-f避免微扰生成非物理结构，根据键长过滤下！
+:::
+```shell
+NepTrain perturb CsPbI3.vasp -n 10000 -c 0.03 -d 0.2 -f
+<!-- 输出如下： -->
+Current structure:Cs18Pb18I54 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:01
+```
+脚本会输出perturb.xyz。我们在使用select从10000个中抽取100个作为最初的训练集。
+:::{note}
+- 要根据select的输出调整-d参数，或者直接输入-d 0 ，但选择效果可能不是最佳
+- 如果没有势函数默认使用SOAP获取描述符，SOAP描述符的间距都比较大，所以要调整-d。
+:::
+```shell
+NepTrain select perturb.xyz -max 100 -d 1
+<!-- 输出如下： -->
+[2024-12-28 18:15:21.436949] --  Reading trajectory perturb.xyz
+[2024-12-28 18:15:28.985300] --  The file base does not exist.
+[2024-12-28 18:15:28.986175] --  The file ./nep.txt does not exist.
+[2024-12-28 18:15:28.986671] --  An invalid path for nep.txt was provided, using SOAP descriptors instead.
+[2024-12-28 18:15:29.454689] --  Start generating structure descriptor, please wait
+[2024-12-28 18:16:18.169325] --  Starting to select points, please wait...
+[2024-12-28 18:16:24.492264] --  Obtained 100 structures.
+[2024-12-28 18:16:25.800733] --  The point selection distribution chart is saved to ./selected.png.
+[2024-12-28 18:16:25.801237] --  The selected structures are saved to ./selected.xyz.
+```
+然后运行以下命令，准备工作完毕！
+```shell
+mv selected.xyz train.xyz
+```
+## 初始化任务
+首先，我们使用以下命令进行初始化
+```shell
+NepTrain init
+```
+将`CsPbI3.vasp`放到程序创建的`structure`目录:
+```shell
+mv CsPbI3.vasp structure
+```
+在这里除了train.xyz的文件，其他都可以删除了。不删除也影响程序。
