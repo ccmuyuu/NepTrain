@@ -30,3 +30,14 @@ These output files serve as inputs for the `train` command. Detailed modificatio
 
 - `sub_vasp.sh`  
   A script file for submitting VASP tasks. <span style="color:red;">Modify the queue information based on your cluster setup. </span> 
+### 可选的模板文件
+- INCAR
+用户可以通过`INCAR`文件指定单点能的计算细节。如果没有指定则使用默认的INCAR。默认INCAR细节详见[INCAR](./vasp.md#default-incar)
+- nep.in
+如果没有指定该文件，会根据训练集自动判断元素种类，生成最简的nep.in。如果需要修改训练超参数，请自行创建该文件。
+最简的nep.in如下
+  ```text
+    generation     100000
+    type     3 I Cs Pb
+    ```
+## 文件修改

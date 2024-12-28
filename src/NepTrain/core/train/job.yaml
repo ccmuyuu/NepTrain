@@ -58,7 +58,7 @@ select:
   min_distance: 0.01   #Hyperparameters for farthest point sampling
 
 limit:
-  force: 50  #Limit the force of the structure to between -force and force
+  force: 20  #Limit the force of the structure to between -force and force
 
 
 

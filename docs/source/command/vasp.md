@@ -26,4 +26,32 @@ NepTrain vasp <model_path> [options]
   Set k-spacing value.
 - `-ka`  
   Set k-points as 1 or 3 numbers (comma-separated). Default: `[1, 1, 1]`.
+
 ## Output
+待完善
+## Default INCAR
+```text
+SYSTEM = NepTrain-default-incar
+ALGO = Normal
+EDIFF = 1e-06
+EDIFFG = -0.01
+ENCUT = 500
+GGA = PE
+IBRION = -1
+ISMEAR = 0
+ISPIN = 1
+ISTART = 0
+LCHARG = False
+LREAL = Auto
+LWAVE = False
+NELM = 100
+NPAR = 4
+NSW = 0
+PREC = Normal
+SIGMA = 0.05
+```
+
+## Example
+:::{note}
+如果`./INCAR`是一个无效的文件路径，会使用默认的INCAR。
+:::
