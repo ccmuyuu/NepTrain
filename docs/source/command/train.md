@@ -85,11 +85,7 @@ $@
       max_selected: 50
       min_distance: 0.01   #Hyperparameters for farthest point sampling
    ```
-3. 最远点采样留下的力的阈值，力超过这一数值的结构将会被丢弃，通常运行MD时的力在10eV/埃以下，因此，这个值通常设置为20-40.
-   ```yaml
-   limit:
-     force: 20  # Limit the force of the structure to between -force and force
-   ```
+ 
 在这里，我们设置VASP10节点计算单点能、K点使用kspacing设置0.1。主动学习跑10、100、500、1000ps。每次md的温度范围设置0-300k。
 因为我们需要先进行单点能计算后才进入训练，所以这里current_job设置vasp。如果训练集是计算后的。可以初始任务设置nep
 修改后的job.yaml如下。
