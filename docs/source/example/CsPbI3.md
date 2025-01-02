@@ -1,14 +1,14 @@
 # CsPbI3
 
-## 准备工作
+## Preparation Work
 :::{note}
-首先我们创建个工作路径叫CsPbI3.后面的操作都默认在这个目录下。
+First, we create a working directory called CsPbI3. All subsequent operations are assumed to be in this directory by default.
 :::
 
-我们这里以立方相的$CsPbI_3$为例介绍整个自动化训练框架的使用
-首先我们从[Materials Project](https://next-gen.materialsproject.org/materials/mp-1069538?chemsys=Cs-Pb-I)下载cif文件。
-然后在VESTA扩包[3,3,2]作为后面的训练的初始结构,文件名为`CsPbI3.vasp`。
-扩包后的结构如下
+Here, we take the cubic phase of $CsPbI_3$ as an example to introduce the use of the entire automated training framework.
+We download the .cif file from [Materials Project](https://next-gen.materialsproject.org/materials/mp-1069538?chemsys=Cs-Pb-I)。
+Then we make the supercell of [3,3,2] in VESTA as the  initial structure for subsequent training, with the file name CsPbI3.vasp.
+The supercell structure is as follows:
 ```text
 Cs1 Pb1 I3
 1.0
@@ -112,24 +112,24 @@ Direct
 
 ```
 
-## 生成微扰训练集
-我们先生成10000个微扰训练集，3%的形变，0.2Å的原子微扰。
+## Generate Perturbation Training Set
+We first generate 10000 perturbation training sets with 3% cell deformation and 0.2Å atomic perturbation.
 :::{tip}
-这里选择加入-f避免微扰生成非物理结构，根据键长过滤下！
+Here, we choose to add -f parameter to avoid generating non-physical structures from perturbations, and it was filterd based on bond length.
 :::
 ```shell
 NepTrain perturb CsPbI3.vasp -n 10000 -c 0.03 -d 0.2 -f
-<!-- 输出如下： -->
+<!-- Output is as follows: -->
 Current structure:Cs18Pb18I54 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:01
 ```
-脚本会输出perturb.xyz。我们在使用select从10000个中抽取100个作为最初的训练集。
+The script will output perturb.xyz. We then use select to extract 100 structures from the 10000 structures as the initial training set.
 :::{note}
-- 要根据select的输出调整-d参数，或者直接输入-d 0 ，但选择效果可能不是最佳
-- 如果没有势函数默认使用SOAP获取描述符，SOAP描述符的间距都比较大，所以要调整-d。
+- You may adjust the -d parameter according to the output of selected structure, or directly use -d 0, but the selection may not be optimal
+- If there is no NEP potential, SOAP descriptors will be used by default. Considering the spacing of SOAP descriptors is relatively large, so you should adjust -d parameter. 
 :::
 ```shell
 NepTrain select perturb.xyz -max 100 -d 1
-<!-- 输出如下： -->
+<!-- Output is as follows: -->
 [2024-12-28 18:15:21.436949] --  Reading trajectory perturb.xyz
 [2024-12-28 18:15:28.985300] --  The file base does not exist.
 [2024-12-28 18:15:28.986175] --  The file ./nep.txt does not exist.
@@ -140,20 +140,20 @@ NepTrain select perturb.xyz -max 100 -d 1
 [2024-12-28 18:16:25.800733] --  The point selection distribution chart is saved to ./selected.png.
 [2024-12-28 18:16:25.801237] --  The selected structures are saved to ./selected.xyz.
 ```
-然后运行以下命令，准备工作完毕！
+Then run the following command to finish the preparation!
 ```shell
 mv selected.xyz train.xyz
-<!-- 这个删除是非必要的 -->
+<!-- This deletion is not necessary -->
 rm selected_perturb.xyz.xyz perturb.xyz selected.png
 ```
-## 初始化任务
+## Initialize the Task
 :::{tip}
-所有的模板文件都可以自行保存，如果有就会跳过
+All template files can be saved by yourself. And all template files can be saved independently. If a corresponding template file exists in the designated directory (the default being the working directory), the creation of a new template file will be skipped, and the existing template file will be used instead.
 :::
-首先，我们使用以下命令进行初始化
+First, we use the following command to initialize
 ```shell
 NepTrain init
-<!-- 输出如下： -->
+<!-- Output is as follows: -->
 [2024-12-29 10:08:27.298365] --  For existing files, we choose to skip; if you need to forcibly generate and overwrite, please use -f or --force.
 [2024-12-29 10:08:27.302688] --  Create the directory ./structure, please place the expanded structures that need to run MD into this folder!
 [2024-12-29 10:08:27.312968] --  Please check the queue information and environment settings in sub_vasp.sh!
@@ -165,11 +165,11 @@ NepTrain init
 [2024-12-29 10:08:27.345471] --  Create run.in; you can modify the ensemble settings! Temperature and time will be modified by the program!
 [2024-12-29 10:08:27.351823] --  Initialization is complete. After checking the files, you can run `NepTrain train job.yaml` to proceed.
 ```
-将`CsPbI3.vasp`放到程序创建的`structure`目录:
+Move `CsPbI3.vasp` to the `structure` directory created by the program:
 ```shell
 mv CsPbI3.vasp structure
 ``` 
-我们来看下现在的目录：
+Let's take a look at the current directory:
 ```text
 ├── job.yaml
 ├── run.in
@@ -179,10 +179,10 @@ mv CsPbI3.vasp structure
 ├── sub_vasp.sh
 └── train.xyz
 ```
-### 修改提交脚本
-sub_gpu.sh 是提交NEP以及GPUMD的脚本，sub_vasp.sh是提交VASP的脚本。
-在这里我们只需要修改队列信息和初始化环境的命令即可。
-修改后如下
+### Modify Submission Scripts
+The sub_gpu.sh is the script for submitting NEP and GPUMD, and the sub_vasp.sh is for submitting VASP.
+Here we only need to modify the queue information and the commands for initializing the environment.
+After modification, it is as follows:
 ```shell
 #! /bin/bash
 #SBATCH --job-name=NepTrain
@@ -205,25 +205,25 @@ source ~/.bashrc
 conda activate NepTrain
 $@
 ```
-### 修改MD模板[可选]
-默认的run.in是npt的，一般来说只需要修改`ensemble`即可，程序会自动替换温度。
-我们这里不做修改。
-### 修改NEP训练参数
-默认情况下，程序不强制要求传入nep.in。程序会自动根据训练集生成一个最简单的nep.in。
-如果需要修改超参数，请将自己的nep.in放在这个目录即可。 
-### 修改任务细节
-在job.yaml中，我们尽可能地通过注释解释了每个参数。并且大部分参数都是不需要调整的。
-我们在这里不会详细的解释每个参数，只演示怎么根据自己体系修改。
+### Modify MD Template [Optional]
+The default run.in  is for npt, and generally, only the `ensemble` needs to be modified, the program will automatically replace the temperature.
+We are not making any changes here.
+### Modify NEP Training Parameters
+By default, the program does not require the `nep.in` file to be provided. It will automatically generate the simplest `nep.in` based on the training set.
+If you need to modify hyperparameters, simply place your own `nep.in` file in this directory(the default working directory or the directory specified for `nep.in` in the `.yaml` file). 
+### Modify Task Details
+In `job.yaml` we have explained each parameter through comments as much as possible. And most parameters do not need to be adjusted.
+We will not explain each parameter in detail here, only showing how to modify according to your own system.
 
-#### 修改VASP计算细节
+#### VASP Calculation Details
 :::{tip}
-`cpu_core`要和sub_vasp.sh申请的核数统一
+`cpu_core` should be unified with the number of cores applied for in `sub_vasp.sh`.
 :::
-为了加速单点计算，我们通过`vasp_job`设置任务数量，程序会按照这个数量切分任务。
-这个根据自己的计算资源决定。
+To accelerate single-point energy calculations, we set the number of tasks through `vasp_job`, and the program will divide the tasks according to this number.
+This depends on your own computational resources.
 
-此外，所有的计算细节都通过`INCAR`指定，可以自行创建一个`INCAR`放在这个目录下。
-我们还需要修改k点。我们这里选用kspacing的形式。修改后如下
+In addition, all calculation details are specified through INCAR, and you can create your own INCAR and place it in this directory(the default working directory or the directory specified for `nep.in` in the `.yaml` file).
+We also need to modify the k-points selection. Here we choose the `kspacing` form. After modification, it is as follows:
 ```yaml
 vasp:
 
@@ -240,15 +240,18 @@ vasp:
     - 20 #c
   kspacing: 0.1
 ```
-#### 修改迭代细节
-目前的程序迭代次数是根据主动学习的时间确定的。
-我们选择开启键长过滤
-我们设置MD温度范围0-300k,迭代时间分别为10ps、100ps、500ps、1000ps。
 :::{tip}
-`step_times`并不要求是一个递进的关系，比如可以10 100 100 500 500 这种重复性的检测。
-如果在第二次的100ps中，没有抽取到结构，除了多做一个md的时间，并不会重复训练。
+Typically, a kspacing value of 0.2 is sufficient for common calculations. However, for metals, the k-point density needs to be increased. Usually, a kspacing value of 0.1 is much sufficient for metals.
 :::
-修改后如下
+#### Modify Active Learning Iteration Details
+The current program's number of iterations is determined by the time of active learning.
+We choose to enable bond length filtering.
+We set the MD temperature range to 0-300k, with iteration times of 10ps, 100ps, 500ps, and 1000ps.
+:::{tip}
+`step_times`does not require a progressive relationship, for example, it can be 10 100 100 500 500 this kind of repetitive detection.
+If no structures are extracted in the second 100ps, in addition to the extra time for one md, there will be no repeated training.
+:::
+After modification, it is as follows:
 ```yaml
 gpumd:
 #Time for iterative progressive learning in units of picoseconds.
@@ -270,7 +273,7 @@ gpumd:
   run_in_path: ./run.in
   filter_by_bonds: true  #Enable bond length detection, and determine structures with bond lengths below 60% of the equilibrium model bond lengths as non-physical structures.
 ```
-额外的说一句yaml语法。
+An additional note on `yaml` syntax.
    ```yaml
     gpumd:
     #Time for iterative progressive learning in units of picoseconds.
@@ -281,27 +284,27 @@ gpumd:
         - 500
         - 1000
    ```
-   等价于
+   is equivalent to
    ```yaml
     gpumd:
     #Time for iterative progressive learning in units of picoseconds.
     #The first active learning is at 10ps, the second at 100ps, with a total of four active learning sessions.
       step_times: [10, 100, 500, 1000]
    ```
-#### 修改抽样细节
-我们设置每次迭代最多选取80个结构.最小距离为0.01
+#### Modify Sampling Details
+We set a maximum of 80 structures to be selected each time. The minimum distance is 0.01
 ```yaml
 select:
   #After completing this round of MD, a maximum of max_selected structures will be selected from all trajectories.
   max_selected: 80
   min_distance: 0.01   #Hyperparameters for farthest point sampling
 ```
-完整的修改后的job.yaml如下
+The complete modified `job.yaml` is as follows
 ```yaml
 version: 1.4.3
 queue: slurm #Select the queuing system, divided into Slurm and local.
 vasp_job: 10 #The number of tasks submitted when calculating single-point energy with VASP.
-#所有任务提交的根目录
+#All task submission root directories
 work_path: ./cache  #Root directory for all task submissions.
 current_job: vasp  #If the current_job has three states: nep, gpumd, vasp, and if train.xyz has not been calculated, set it to vasp; otherwise, directly set it to use nep to train the potential function, or use gpumd.
 generation: 1  #Marking resume tasks.
@@ -360,13 +363,13 @@ select:
 limit:
   force: 20  #Limit the force of the structure to between -force and force
 ```
-## 开始训练
-在登陆节点的终端执行一下命令
+## Start Training
+Execute the following command in the terminal of the login node
 ```shell
 NepTrain train job.yaml
 
 ```
-后台运行
+Run in the background
 ```shell
 nohup NepTrain train job.yaml &
 
