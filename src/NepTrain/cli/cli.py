@@ -271,8 +271,8 @@ def build_select(subparsers):
 
     parser_select.add_argument("--base", "-base",
                                type=str,
-                               default="base",
-                               help="Provide a path to base.xyz, and sample the trajectory based on base.xyz."
+                               default="train.xyz",
+                               help="Provide a path to base.xyz, and sample the trajectory based on base.xyz, default is train.xyz."
                                )
     parser_select.add_argument("--nep", "-nep",
                                type=str,

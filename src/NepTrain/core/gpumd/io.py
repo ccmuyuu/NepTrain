@@ -50,7 +50,7 @@ class RunInput:
 
                     run[1][0]=str(int(int(times)*1000*1/self.time_step))
                     self.total_time+=int(int(times)*1000*1/self.time_step)
-
+        print(self.run_in)
     def read_run(self,file_name):
         self.run_in.clear()
         with open(file_name,'r',encoding="utf8") as f:

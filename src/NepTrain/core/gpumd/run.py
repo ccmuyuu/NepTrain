@@ -41,7 +41,7 @@ def calculate_gpumd(atoms:Atoms,argparse):
         run.read_run(run_in_path)
         run.set_time_temp(argparse.time,temperature)
         directory=os.path.join(argparse.directory,f"{atoms_index}-{atoms.symbols}@{temperature}k-{argparse.time}ps")
-        utils.print_msg(f"GPUMD is running, temperature: {temperature}k. Time: {argparse.time*run.time_step}ps" )
+        utils.print_msg(f"GPUMD is running, temperature: {temperature}k. Time: {argparse.time}ps" )
 
         run.calculate(atoms,directory)
 
