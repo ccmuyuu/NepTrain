@@ -42,6 +42,7 @@ class Nep3Calculator:
         _types=[]
         _boxs=[]
         _positions=[]
+
         for structure in structures:
             symbols = structure.get_chemical_symbols()
             _type = [self.type_dict[k] for k in symbols]
@@ -50,6 +51,7 @@ class Nep3Calculator:
             _types.append(_type)
             _boxs.append(_box)
             _positions.append(_position)
+
         descriptor = self.nep3.get_descriptors(_types, _boxs, _positions)
 
         return np.array(descriptor)
@@ -123,5 +125,21 @@ class DescriptorCalculator:
 
 
 if __name__ == '__main__':
-    nep3 = Nep3Calculator(model_file="/mnt/d/vispy/bug/nep.txt")
-    
+    nep3 = Nep3Calculator(model_file="/mnt/d/Desktop/vispy/KNbO3/nep.txt")
+    from ase.io import read
+    import time
+    structures = read("/mnt/d/Desktop/vispy/KNbO3/train.xyz",index=":")
+    start=time.time()
+
+    descriptors = nep3.get_structures_descriptors(structures)
+    print(f"计算描述符：{len(structures)}个结构，耗时：{time.time()-start:.3f}s")
+    print("descriptors",descriptors.shape)
+    start=time.time()
+
+    potentials ,forces ,virials   = nep3.calculate(structures)
+
+    print(f"计算性质：{len(structures)}个结构，耗时：{time.time()-start:.3f}s")
+    print("potentials",potentials.shape)
+    print("forces",forces.shape)
+    print("virials",virials.shape)
+
