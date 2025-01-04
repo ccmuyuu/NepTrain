@@ -42,6 +42,7 @@ class Nep3Calculator:
         _types=[]
         _boxs=[]
         _positions=[]
+
         for structure in structures:
             symbols = structure.get_chemical_symbols()
             _type = [self.type_dict[k] for k in symbols]
@@ -50,11 +51,50 @@ class Nep3Calculator:
             _types.append(_type)
             _boxs.append(_box)
             _positions.append(_position)
+
         descriptor = self.nep3.get_descriptors(_types, _boxs, _positions)
 
         return np.array(descriptor)
 
 
+    def calculate(self,structures:list[Atoms]):
+        group_size=[]
+        _types = []
+        _boxs = []
+        _positions = []
+        if isinstance(structures, Atoms):
+            structures = [structures]
+        for structure in structures:
+            symbols = structure.get_chemical_symbols()
+            _type = [self.type_dict[k] for k in symbols]
+            _box = structure.cell.transpose(1, 0).reshape(-1).tolist()
+            _position = structure.get_positions().transpose(1, 0).reshape(-1).tolist()
+            _types.append(_type)
+            _boxs.append(_box)
+            _positions.append(_position)
+            group_size.append(len(_type))
+
+        potentials, forces, virials = self.nep3.calculate(_types, _boxs, _positions)
+
+
+        split_indices = np.cumsum(group_size)[:-1]
+        #
+        potentials=np.hstack(potentials)
+        split_potential_arrays = np.split(potentials, split_indices)
+        potentials_array = np.array(list(map(np.sum, split_potential_arrays)))
+        # print(potentials_array)
+
+        # 处理每个force数组：reshape (3, -1) 和 transpose(1, 0)
+        reshaped_forces = [np.array(force).reshape(3, -1).T for force in forces]
+
+        forces_array = np.vstack(reshaped_forces)
+        # print(forces_array)
+
+        reshaped_virials = np.vstack([np.array(virial).reshape(9, -1).mean(axis=1) for virial in virials])
+
+        # virials_array = reshaped_virials[:,[0,4,8,1,5,6]]
+        virials_array=reshaped_virials
+        return potentials_array,forces_array,virials_array
 
 
 class DescriptorCalculator:
@@ -82,3 +122,24 @@ class DescriptorCalculator:
         else:
 
             return  np.array([self.calculator.create_single(structure).mean(0) for structure in structures])
+
+
+if __name__ == '__main__':
+    nep3 = Nep3Calculator(model_file="/mnt/d/Desktop/vispy/KNbO3/nep.txt")
+    from ase.io import read
+    import time
+    structures = read("/mnt/d/Desktop/vispy/KNbO3/train.xyz",index=":")
+    start=time.time()
+
+    descriptors = nep3.get_structures_descriptors(structures)
+    print(f"计算描述符：{len(structures)}个结构，耗时：{time.time()-start:.3f}s")
+    print("descriptors",descriptors.shape)
+    start=time.time()
+
+    potentials ,forces ,virials   = nep3.calculate(structures)
+
+    print(f"计算性质：{len(structures)}个结构，耗时：{time.time()-start:.3f}s")
+    print("potentials",potentials.shape)
+    print("forces",forces.shape)
+    print("virials",virials.shape)
+
