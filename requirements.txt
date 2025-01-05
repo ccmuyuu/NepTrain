@@ -6,3 +6,4 @@ argcomplete==3.4.0
 rich==13.9.3
 ase==3.23.0
 pybind11==2.12.0
+umap-learn==0.5.7
