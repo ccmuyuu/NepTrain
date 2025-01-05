@@ -6,7 +6,7 @@ First, we create a working directory called CsPbI3. All subsequent operations ar
 :::
 
 Here, we take the cubic phase of $CsPbI_3$ as an example to introduce the use of the entire automated training framework.
-We download the .cif file from [Materials Project](https://next-gen.materialsproject.org/materials/mp-1069538?chemsys=Cs-Pb-I)。
+We download the .cif file from [Materials Project](https://next-gen.materialsproject.org/materials/mp-1069538?chemsys=Cs-Pb-I).
 Then we make the supercell of [3,3,2] in VESTA as the  initial structure for subsequent training, with the file name CsPbI3.vasp.
 The supercell structure is as follows:
 ```text
