@@ -86,15 +86,11 @@ def select_structures(train, new_atoms ,descriptor, max_selected=20, min_distanc
 def compute_min_bond_lengths(atoms ):
     # 获取原子符号
     dist_matrix = atoms.get_all_distances()
-
     symbols = atoms.get_chemical_symbols()
-
     # 提取上三角矩阵（排除对角线）
     i, j = np.triu_indices(len(atoms), k=1)
-
     # 用字典来存储每种元素对的最小键长
     bond_lengths = {}
-
     # 遍历所有原子对，计算每一对元素的最小键长
     for idx in range(len(i)):
         atom_i, atom_j = symbols[i[idx]], symbols[j[idx]]
@@ -106,7 +102,6 @@ def compute_min_bond_lengths(atoms ):
         #     continue
         # 确保元素对按字母顺序排列，避免 Cs-Ag 和 Ag-Cs 视为不同
         element_pair = tuple(sorted([atom_i, atom_j]))
-
         # 如果该元素对尚未存在于字典中，初始化其最小键长
         if element_pair not in bond_lengths:
             bond_lengths[element_pair] = bond_length

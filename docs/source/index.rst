@@ -5,7 +5,7 @@
 
 NepTrain documentation
 =========================
-Welcome to NepTrain – an advanced automation toolkit for training neural network potentials (NEP). Simplify your workflows with seamless integration of GPUMD, VASP, and NEP, offering features like perturbation, active learning, single-point energy calculations, and efficient potential training.
+Welcome to NepTrain – an advanced automation toolkit for training neuroevolution potential (NEP). Simplify your workflows with seamless integration of GPUMD, VASP, and NEP, offering features like perturbation, active learning, single-point energy calculations, and efficient potential training.
 
 
 .. toctree::

@@ -29,7 +29,7 @@ def run_select(argparse):
     for index,_path in enumerate(argparse.trajectory_paths):
 
         if utils.is_file_empty(_path):
-            utils.print_warning(f"An invalid file path was provided: {argparse.trajectory_path}.")
+            utils.print_warning(f"An invalid file path was provided: {argparse.trajectory_paths}.")
             continue
 
         utils.print_msg(f"Reading trajectory {_path}")

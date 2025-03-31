@@ -5,9 +5,13 @@
 # @email    : 1747193328@qq.com
 import os
 import subprocess
+from pathlib import Path
 
 import numpy as np
+from ase.calculators import calculator
+from ase.calculators.calculator import Calculator
 from ase.calculators.vasp import Vasp
+from ase.calculators.vasp.vasp import check_atoms
 from ase.io import read as ase_read
 from ase.io import write as ase_write
 from NepTrain import Config
@@ -42,8 +46,40 @@ class VaspInput(Vasp):
 
         os.environ[self.VASP_PP_PATH] = os.path.expanduser(Config.get("environ", "potcar_path"))
 
+    def calculate(self,
+                  atoms=None,
+                  properties=('energy', ),
+                  system_changes=tuple(calculator.all_changes)):
+        """Do a VASP calculation in the specified directory.
 
-        # self.converged
+        This will generate the necessary VASP input files, and then
+        execute VASP. After execution, the energy, forces. etc. are read
+        from the VASP output files.
+        """
+        Calculator.calculate(self, atoms, properties, system_changes)
+        # Check for zero-length lattice vectors and PBC
+        # and that we actually have an Atoms object.
+        check_atoms(self.atoms)
+
+        self.clear_results()
+
+        command = self.make_command(self.command)
+        self.write_input(self.atoms, properties, system_changes)
+
+        with self._txt_outstream() as out:
+            errorcode, stderr = self._run(command=command,
+                                          out=out,
+                                          directory=self.directory)
+
+        if errorcode:
+            raise calculator.CalculationFailed(
+                '{} in {} returned an error: {:d} stderr {}'.format(
+                    self.name, Path(self.directory).resolve(), errorcode,
+                    stderr))
+
+        # Read results from calculation
+        self.update_atoms(atoms)
+        self.read_results()
     def _run(self, command=None, out=None, directory=None):
         """Method to explicitly execute VASP"""
         if command is None:
@@ -51,13 +87,18 @@ class VaspInput(Vasp):
         if directory is None:
             directory = self.directory
 
-        errorcode = subprocess.call(command,
-                                    shell=True,
-                                    stdout=out,
-                                    stderr=out,
-                                    cwd=directory)
+        result = subprocess.run(command,
+                                shell=True,
+                                cwd=directory,
+                                capture_output=True,
+                                text=True)
+        if out is not None:
+            out.write(result.stdout)
+            out.write(result.stderr)
 
-        return errorcode
+        return result.returncode, result.stderr
+
+
 if __name__ == '__main__':
     vasp=VaspInput()
 
