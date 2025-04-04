@@ -108,7 +108,7 @@ class RunInput:
                                         stderr=f_err,
                                         cwd=directory)
 
-        plot_energy(os.path.join(directory,"thermo.out"),len(atoms))
+        plot_md_thermo(os.path.join(directory,"thermo.out") )
 
 if __name__ == '__main__':
     # read_thermo("1.out",80)

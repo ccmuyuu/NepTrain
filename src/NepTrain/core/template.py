@@ -8,7 +8,7 @@ import os.path
 from ase.io import read as ase_read
 from ruamel.yaml import YAML
 
-from NepTrain import module_path, utils
+from NepTrain import module_path, utils,__version__
 from .utils import check_env
 
 
@@ -74,7 +74,7 @@ def init_template(argparse):
         with open(os.path.join(module_path,"core/train/job.yaml"),"r",encoding="utf8") as f:
 
             config = YAML().load(f  )
-
+        config["version"]=__version__
         if os.path.exists("train.xyz"):
             #检查下第一个结构有没有计算
             atoms=ase_read("./train.xyz",0,format="extxyz")
@@ -98,7 +98,7 @@ def init_template(argparse):
         with open("./job.yaml","r",encoding="utf8") as f:
             user_config = YAML().load(f)
         job=utils.merge_yaml(base_config,user_config)
-        job["version"]=base_config["version"]
+        job["version"]=__version__
 
         with open("./job.yaml","w",encoding="utf8") as f:
             YAML().dump(job,f  )

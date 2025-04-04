@@ -64,16 +64,16 @@ def plot_md_selected(train_des,md_des,selected_des, save_path,decomposition="pca
 
 
 
-def plot_md_thermo(thermo_path,natoms=1):
+def plot_md_thermo(thermo_path ):
     from matplotlib import pyplot as plt
-    plt.rcParams.update({'font.size': 10, 'font.family': 'Arial'})
+
 
 
 
 
 
     fig = plt.figure()
-    data = np.loadtxt('thermo.out')
+    data = np.loadtxt(thermo_path)
 
     dump_interval = get_dump_interval()
     time = np.arange(0, len(data) * dump_interval / 1000, dump_interval / 1000)
@@ -182,6 +182,6 @@ def plot_md_thermo(thermo_path,natoms=1):
 
     plt.tight_layout()
 
-    plt.savefig('thermo.png', dpi=300)
-    plt.savefig(os.path.join(os.path.dirname(thermo_path),"md_energy.png"), dpi=300)
+    plt.savefig(os.path.join(os.path.dirname(thermo_path),"thermo.png") , dpi=300)
+
     plt.close(fig)

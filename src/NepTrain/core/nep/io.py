@@ -103,7 +103,7 @@ class RunInput:
     def calculate(self,directory,show_progress=True):
         utils.verify_path(directory)
         if self.restart:
-            utils.print_tip("Start the restart mode!")
+            # utils.print_tip("Start the restart mode!")
             shutil.copy(self.restart_nep_path,os.path.join(directory,"nep.restart"))
 
 

@@ -11,9 +11,11 @@ from watchdog.observers import Observer
 
 from NepTrain import utils
 
-__version__="1.6.0"
 
 
+from importlib.metadata import version
+
+__version__ = version("NepTrain")
 config_path = utils.get_config_path()
 
 module_path = os.path.dirname(__file__)
