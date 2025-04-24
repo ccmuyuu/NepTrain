@@ -43,7 +43,7 @@ class VaspInput(Vasp):
         super(VaspInput,self).__init__(*args,**kwargs)
         self.input_params["setups"] = {"base": "recommended"}
         self.input_params["pp"] = ''
-
+        
         os.environ[self.VASP_PP_PATH] = os.path.expanduser(Config.get("environ", "potcar_path"))
 
     def calculate(self,
@@ -56,6 +56,8 @@ class VaspInput(Vasp):
         execute VASP. After execution, the energy, forces. etc. are read
         from the VASP output files.
         """
+
+                      
         Calculator.calculate(self, atoms, properties, system_changes)
         # Check for zero-length lattice vectors and PBC
         # and that we actually have an Atoms object.
