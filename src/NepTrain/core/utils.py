@@ -10,9 +10,7 @@ from NepTrain import utils
 
 
 def check_env():
-    print(Config.get("environ", "potcar_path") )
-    print(os.path.expanduser(Config.get("environ", "potcar_path")))
-    print(os.path.exists(os.path.expanduser(Config.get("environ", "potcar_path"))))
+
     if not os.path.exists(os.path.expanduser(Config.get("environ", "potcar_path"))):
         raise FileNotFoundError("Please edit the pseudopotential file path in ~/.NepTrain to set a valid path!")
 
