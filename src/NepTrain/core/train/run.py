@@ -125,7 +125,7 @@ class NepTrainWorker:
     def check_env(self):
 
 
-        if self.generation!=1 and self.config.get("restart") :
+        if self.config.get("restart") :
             utils.print("No need for initialization check.")
             utils.print_msg("--" * 4,
                             f"Restarting to train the potential function for the {self.generation}th generation.",
@@ -223,13 +223,13 @@ class NepTrainWorker:
                 params.append(str(self.config["nep"]["nep_restart_step"]))
 
         return " ".join(params)
-    def build_gpumd_params(self,n_job=1):
+    def build_gpumd_params(self,model_path,temperature,n_job=1,):
         gpumd=self.config["gpumd"]
         params=[]
         params.append("NepTrain")
         params.append("gpumd")
 
-        params.append(os.path.abspath(gpumd.get("model_path")))
+        params.append(os.path.abspath(model_path))
 
         params.append("--directory")
 
@@ -243,9 +243,12 @@ class NepTrainWorker:
         params.append(str(gpumd.get("step_times")[self.generation-1]))
 
         params.append("--temperature")
-        params.append( str(gpumd["temperature_every_step"][n_job] ))
+        if isinstance(temperature,list):
 
-        # params.append(" ".join([str(i) for i in gpumd["temperature_every_step"]]))
+            params.append( str( ))
+        else:
+
+            params.append(" ".join([str(i) for i in temperature]))
 
 
         params.append("--out")
@@ -436,10 +439,24 @@ class NepTrainWorker:
 
     def sub_gpumd(self):
         utils.print_msg(f"Starting active learning.")
-        for i in range(len(self.config["gpumd"]["temperature_every_step"])):
-            cmd = self.build_gpumd_params(i)
+        if self.config.get("gpumd_split_job","temperature")=="temperature":
+            for i,temp in enumerate(self.config["gpumd"]["temperature_every_step"]):
+                cmd = self.build_gpumd_params(self.config["gpumd"].get("model_path"),
+                                              temp,
 
-            self.worker.sub_job(cmd, self.gpumd_path, job_type="gpumd")
+                                              i)
+
+                self.worker.sub_job(cmd, self.gpumd_path, job_type="gpumd")
+        else:
+            if os.path.isdir(self.config["gpumd"]["model_path"]):
+                for i,file in enumerate(os.listdir(self.config["gpumd"]["model_path"])):
+                    cmd = self.build_gpumd_params(os.path.join(self.config["gpumd"]["model_path"],
+                                                               file),
+                                                  self.config["gpumd"]["temperature_every_step"] ,
+
+                                                  i)
+
+                    self.worker.sub_job(cmd, self.gpumd_path, job_type="gpumd")
         self.worker.wait()
 
 

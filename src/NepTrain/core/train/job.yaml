@@ -2,6 +2,7 @@ version: 1.4.3
 queue: slurm #Select the queuing system, divided into Slurm and local.
 vasp_job: 10 #The number of tasks submitted when calculating single-point energy with VASP.
 #所有任务提交的根目录
+gpumd_split_job: temperature  #temperature or structure
 work_path: ./cache  #Root directory for all task submissions.
 current_job: nep  #If the current_job has three states: nep, gpumd, vasp, and if train.xyz has not been calculated, set it to vasp; otherwise, directly set it to use nep to train the potential function, or use gpumd.
 generation: 1  #Marking resume tasks.
@@ -50,7 +51,7 @@ gpumd:
     - 300
   model_path: ./structure
   run_in_path: ./run.in
-  filter_by_bonds: true  #Enable bond length detection, and determine structures with bond lengths below 60% of the equilibrium model bond lengths as non-physical structures.
+  filter_by_bonds: false  #Enable bond length detection, and determine structures with bond lengths below 60% of the equilibrium model bond lengths as non-physical structures.
 
 select:
   #After completing this round of MD, a maximum of max_selected structures will be selected from all trajectories.
