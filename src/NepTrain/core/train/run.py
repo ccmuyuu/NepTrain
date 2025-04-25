@@ -244,11 +244,11 @@ class NepTrainWorker:
 
         params.append("--temperature")
         if isinstance(temperature,list):
+            params.append(" ".join([str(i) for i in temperature]))
 
-            params.append( str( ))
         else:
 
-            params.append(" ".join([str(i) for i in temperature]))
+            params.append( str( temperature))
 
 
         params.append("--out")
