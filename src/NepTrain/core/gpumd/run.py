@@ -5,7 +5,7 @@
 # @email    : 1747193328@qq.com
 
 import os.path
-
+import numpy as np
 from ase import Atoms
 from ase.io import read as ase_read
 from ase.io import write as ase_write
@@ -20,13 +20,16 @@ from .io import RunInput
 
 from ..utils import check_env
 
+import zlib
+def array_to_id(arr):
+    arr = np.ascontiguousarray(arr)  # 确保内存连续
+    return zlib.crc32(arr.tobytes())
 
-atoms_index = 0
 
 @utils.iter_path_to_atoms(["*.vasp","*.xyz"],show_progress=False)
 def calculate_gpumd(atoms:Atoms,argparse):
-    global atoms_index
-    atoms_index+=1
+
+    atoms_index = array_to_id(atoms.positions)
 
     new_atoms=[]
 
