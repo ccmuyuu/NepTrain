@@ -43,7 +43,9 @@ dependencies = [
 "scikit-learn",
 "ruamel.yaml",
 "dscribe",
-"umap-learn>=0.5.7"
+"umap-learn>=0.5.7",
+    "tqdm",
+    "joblib"
 ]
 
 

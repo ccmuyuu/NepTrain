@@ -254,8 +254,7 @@ class NepTrainWorker:
         params.append("--out")
         params.append(self.__getattr__(f"select_md_{n_job}_xyz_file"))
 
-        if gpumd.get("filter_by_bonds",True):
-            params.append("--filter")
+
 
 
         return " ".join(params)
@@ -280,7 +279,10 @@ class NepTrainWorker:
         params.append("--out")
         params.append(self.select_selected_xyz_file)
 
+        if select.get("filter",False):
 
+            params.append("--filter")
+            params.append(select.get("filter" ) if isinstance(select.get("filter" ),float) else 0.6)
 
 
         return " ".join(params)

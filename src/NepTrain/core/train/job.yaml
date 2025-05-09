@@ -57,7 +57,7 @@ select:
   #After completing this round of MD, a maximum of max_selected structures will be selected from all trajectories.
   max_selected: 50
   min_distance: 0.01   #Hyperparameters for farthest point sampling
-
+  filter: 0.6
 limit:
   force: 20  #Limit the force of the structure to between -force and force
 

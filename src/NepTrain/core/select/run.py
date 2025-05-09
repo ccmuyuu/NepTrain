@@ -10,12 +10,12 @@ import numpy as np
 
 
 # from joblib import Parallel, delayed
-
+from tqdm import tqdm
 from NepTrain import utils
 from ase.io import read as ase_read
 from ase.io import write as ase_write
 from .select import select_structures, filter_by_bonds, farthest_point_sampling
-from .filter import adjust_reasonable
+from .filter import adjust_reasonable, parallel_filter_trajectory
 from ..gpumd.plot import plot_md_selected
 
 from ..nep.calculator import DescriptorCalculator
@@ -40,26 +40,33 @@ def run_select(argparse):
 
         if argparse.filter:
             utils.print_msg(f"Start filtering...")
-            count=0
-            for atoms in trajectory:
 
-                if adjust_reasonable(atoms,argparse.filter):
-                    #正常合理的结构
-                    trajectory_structures.append(atoms)
+            # 使用示例
+            trajectory, filter_structures = parallel_filter_trajectory(
+                trajectory, argparse.filter, n_jobs=-1  # -1 表示使用所有CPU核心
+            )
 
-                    count+=1
-                else:
-                    filter_structures.append(atoms)
-            if count!=0:
-                map_path_index.append(np.full(count, index))
+
+            # count=0
+            # for atoms in tqdm(trajectory):
+            #
+            #     if adjust_reasonable(atoms,argparse.filter):
+            #         #正常合理的结构
+            #         trajectory_structures.append(atoms)
+            #
+            #         count+=1
+            #     else:
+            #         filter_structures.append(atoms)
+            # if count!=0:
+            #     map_path_index.append(np.full(count, index))
             if len(filter_structures) >= 0:
                 utils.print_msg(f"Filtering {len(filter_structures)} structures.")
                 ase_write(f"filter_{_path}.xyz",filter_structures,append=False)
-        else:
 
 
-            map_path_index.append(np.full(len(trajectory),index))
-            trajectory_structures.extend(trajectory)
+
+        map_path_index.append(np.full(len(trajectory),index))
+        trajectory_structures.extend(trajectory)
     map_path_index=np.concatenate(map_path_index)
 
 

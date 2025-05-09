@@ -6,7 +6,8 @@
 import numpy as np
 from ase import Atoms
 from ase.data import atomic_numbers,covalent_radii,chemical_symbols
-
+from joblib import Parallel, delayed
+from tqdm import tqdm
 
 def calculate_pairwise_distances(lattice_params:np.ndarray, atom_coords:np.ndarray, fractional=True):
     """
@@ -85,3 +86,25 @@ def adjust_reasonable(atoms, coefficient=0.7):
             if (r1 + r2) * coefficient > bond_length :
                 return False
     return True
+
+
+
+def process_atom(atoms, filter_func):
+    if adjust_reasonable(atoms, filter_func):
+        return atoms, True
+    else:
+        return atoms, False
+
+def parallel_filter_trajectory(trajectory, filter_func, n_jobs=-1):
+    """使用 joblib 并行处理"""
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(process_atom)(atoms, filter_func)
+        for atoms in tqdm(trajectory, desc="Filtering structures")
+    )
+
+    trajectory_structures = [atoms for atoms, is_reasonable in results if is_reasonable]
+    filter_structures = [atoms for atoms, is_reasonable in results if not is_reasonable]
+
+    return trajectory_structures, filter_structures
+
+
