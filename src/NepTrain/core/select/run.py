@@ -56,7 +56,11 @@ def run_select(argparse):
         map_path_index.append(np.full(len(trajectory),index))
         trajectory_structures.extend(trajectory)
     map_path_index=np.concatenate(map_path_index)
+    if len(trajectory_structures)==0:
+        utils.print_warning("no structure.")
+        ase_write(argparse.out_file_path, trajectory_structures)
 
+        return
 
     if utils.is_file_empty(argparse.base):
         base_train=[]
@@ -104,6 +108,7 @@ def run_select(argparse):
 
     utils.print_msg("Starting to select points, please wait...")
     new_structure_des=np.vstack(trajectory_structure_des)
+
 
 
     selected_i =farthest_point_sampling(new_structure_des,argparse.max_selected,argparse.min_distance,selected_data=train_structure_des)
