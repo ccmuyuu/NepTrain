@@ -16,7 +16,7 @@ NepTrain perturb <model_path> [options]
 - `-c, --cell`  
   Deformation ratio. Default: `0.03`.
 - `-d, --distance`  
-  Minimum atom distance (Å). Default: `0.1`.
+  Maximum atom distance (Å). Default: `0.1`.
 - `-o, --out`  
   Output file path for perturbed structures. Default: `./perturb.xyz`.
 - `-a, --append`  

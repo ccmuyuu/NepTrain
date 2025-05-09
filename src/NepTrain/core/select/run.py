@@ -21,6 +21,7 @@ from ..nep.calculator import DescriptorCalculator
 
 
 def run_select(argparse):
+    print(argparse)
     import matplotlib.pyplot as plt
     map_path_index=[]
     all_trajectory=[]

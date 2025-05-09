@@ -85,9 +85,7 @@ def build_perturb(subparsers):
                              help="Write to out_file_path in append mode, default False.",
 
                              )
-    parser_perturb.add_argument("--filter", "-f", action="store_true",
-                               help="Whether to filter based on minimum bond length, default is False.",
-                               default=False)
+
 def build_vasp(subparsers):
     parser_vasp = subparsers.add_parser(
         "vasp",
@@ -234,9 +232,7 @@ def build_gpumd(subparsers):
                              )
     parser_gpumd.add_argument("--time", "-t", type=int, help="Molecular dynamics time, unit ps, default 10 ps.", default=10)
     parser_gpumd.add_argument("--temperature", "-T", type=int, help="Molecular dynamics temperature in Kelvin,multiple integers can be input. default is 300 K", nargs="*", default=[300])
-    parser_gpumd.add_argument("--filter", "-f", action="store_true",
-                               help="Whether to filter based on minimum bond length, default is False.",
-                               default=False)
+
     parser_gpumd.add_argument("--out", "-o",
                                dest="out_file_path",
 
@@ -286,7 +282,10 @@ def build_select(subparsers):
     parser_select.add_argument("--min_distance","-d", type=float,
                                help="Minimum bond length for farthest-point sampling, default is 0.01.",
                                default=0.01)
-
+    parser_select.add_argument("--filter", "-f", type=float,
+                               const=0.6,nargs='?',
+                               help="Whether to filter based on minimum bond length, default is False.",
+                               default=False)
 
     dc_group = parser_select.add_mutually_exclusive_group(required=False)
     dc_group.add_argument('-pca',"--pca", action='store_const', const='pca', dest='decomposition',
