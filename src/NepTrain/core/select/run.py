@@ -43,22 +43,10 @@ def run_select(argparse):
 
             # 使用示例
             trajectory, filter_structures = parallel_filter_trajectory(
-                trajectory, argparse.filter, n_jobs=-1  # -1 表示使用所有CPU核心
+                trajectory, argparse.filter, n_jobs=os.cpu_count()-2  # -1 表示使用所有CPU核心
             )
 
 
-            # count=0
-            # for atoms in tqdm(trajectory):
-            #
-            #     if adjust_reasonable(atoms,argparse.filter):
-            #         #正常合理的结构
-            #         trajectory_structures.append(atoms)
-            #
-            #         count+=1
-            #     else:
-            #         filter_structures.append(atoms)
-            # if count!=0:
-            #     map_path_index.append(np.full(count, index))
             if len(filter_structures) >= 0:
                 utils.print_msg(f"Filtering {len(filter_structures)} structures.")
                 ase_write(f"filter_{_path}.xyz",filter_structures,append=False)
