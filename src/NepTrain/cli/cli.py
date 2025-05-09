@@ -284,7 +284,7 @@ def build_select(subparsers):
                                default=0.01)
     parser_select.add_argument("--filter", "-f", type=float,
                                const=0.6,nargs='?',
-                               help="Whether to filter based on minimum bond length, default is False.",
+                               help="Whether to filter based on covalent radius, the default is False. If True, the default coefficient is 0.6, and a coefficient can be passed in",
                                default=False)
 
     dc_group = parser_select.add_mutually_exclusive_group(required=False)
