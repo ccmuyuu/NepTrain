@@ -51,13 +51,12 @@ gpumd:
     - 300
   model_path: ./structure
   run_in_path: ./run.in
-  filter_by_bonds: false  #Enable bond length detection, and determine structures with bond lengths below 60% of the equilibrium model bond lengths as non-physical structures.
 
 select:
   #After completing this round of MD, a maximum of max_selected structures will be selected from all trajectories.
   max_selected: 50
   min_distance: 0.01   #Hyperparameters for farthest point sampling
-  filter: 0.6
+  filter: 0.6    #Passing a coefficient enables bond length detection, and bonds shorter than the sum of the covalent radii multiplied by the coefficient are considered unphysical structures.
 limit:
   force: 20  #Limit the force of the structure to between -force and force
 
