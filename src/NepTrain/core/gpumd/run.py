@@ -53,10 +53,7 @@ def calculate_gpumd(atoms:Atoms,argparse):
             atom.info["Config_type"] = f"{atom.symbols}-epoch-{argparse.time}ps-{temperature}k-{i + 1}"
 
 
-        if argparse.filter:
-            good,bad=filter_by_bonds(dump,model=atoms)
-            dump=good
-            ase_write(os.path.join(directory,"remove_by_bond_structures.xyz"),bad)
+
         ase_write(argparse.out_file_path,dump,append=True)
 
 
