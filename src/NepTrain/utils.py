@@ -191,9 +191,8 @@ def iter_path_to_atoms(glob_strs: list,show_progress=True,**kkwargs):
                 except KeyboardInterrupt:
                     return result
                 except Exception as e:
-                    print(traceback.format_exc())
+
                     print_warning(traceback.format_exc())
-                    print_warning(e)
                     pass
             return result
         return wrapper
